@@ -1,0 +1,29 @@
+name: Bug Report
+description: Report a Bug that you've found.
+labels: [bug]
+body:
+    - type: textarea
+      attributes:
+          label: Issue
+          description: What happened, and how can the Bug be reproduced? Provide Screenshots if possible.
+          placeholder: 'Please only add one Bug per Bug Report.'
+      validations:
+          required: true
+    - type: textarea
+      attributes:
+          label: Expected Behavior
+          description: What would you normally expect to happen?
+      validations:
+          required: true
+    - type: input
+      attributes:
+          label: Which Browser, and Browser Version are you using?
+          placeholder: 'Chrome, Version 105.0.5195.127'
+      validations:
+          required: true
+    - type: input
+      attributes:
+          label: Which Extension Version are you using?
+          placeholder: 'v1.2.3'
+      validations:
+          required: true

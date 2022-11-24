@@ -1,0 +1,11 @@
+name: Feature Request
+description: Suggest new Features to be added.
+labels: [feature request]
+body:
+    - type: textarea
+      attributes:
+          label: Proposal
+          description: Explain the Feature that you would like to be added.
+          placeholder: 'Please only add one Feature per Feature Request.'
+      validations:
+          required: true

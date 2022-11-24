@@ -1,0 +1,38 @@
+:root {
+    --clrDark: hsl(0, 0%, 10%);
+    --clrLight: hsl(0, 0%, 75%);
+    --clrAccent: hsl(210, 100%, 60%);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 1rem;
+}
+
+body {
+    background: var(--clrDark);
+    color: var(--clrLight);
+}
+
+.container {
+    width: 275px;
+    margin: 0.5em 0.75em;
+    text-align: right;
+}
+
+select {
+    width: 70%;
+    background: var(--clrAccent);
+    color: var(--clrDark);
+}
+
+#save {
+    width: 100%;
+    background: var(--clrAccent);
+    color: var(--clrDark);
+}

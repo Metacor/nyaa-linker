@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="popup.css" />
+        <script src="popup.js" defer></script>
+        <title>Popup</title>
+    </head>
+
+    <body>
+        <div class="container">
+            <label for="filter_select">Filter:</label>
+            <select id="filter_select">
+                <option value="0">No Filter</option>
+                <option value="1">No Remakes</option>
+                <option value="2">Trusted Only</option>
+            </select>
+
+            <label for="category_select">Category:</label>
+            <select id="category_select">
+                <option value="0_0">All Categories</option>
+                <option value="1_2">English-Translated</option>
+                <option value="1_3">Non-English-Translated</option>
+                <option value="1_4">Raw</option>
+            </select>
+
+            <label for="sort_select">Sort Type:</label>
+            <select id="sort_select">
+                <option value="comments">Comments</option>
+                <option value="size">Size</option>
+                <option value="id">Date</option>
+                <option value="seeders">Seeders</option>
+                <option value="leechers">Leechers</option>
+                <option value="downloads">Downloads</option>
+            </select>
+
+            <label for="order_select">Sort Order:</label>
+            <select id="order_select">
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+            </select>
+        </div>
+        <button id="save">Save</button>
+    </body>
+</html>

@@ -68,8 +68,8 @@ const searchNyaa = () => {
 
                     btnSpace = document.querySelector('.mainEntry');
                     createBtn();
-                    btn.classList.add('button', 'screenshots');
-                    const buttons = document.getElementsByClassName('button screenshots');
+                    btn.classList.add('button');
+                    const buttons = document.querySelectorAll('.mainEntry > .button');
                     for (const button in buttons) {
                         typeof buttons[button] === 'object' && (buttons[button].style.width = '180px');
                     }

@@ -1,6 +1,6 @@
 {
     "name": "Nyaa Linker",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Adds a button to Anime and Manga database websites that opens a relevant Nyaa search",
     "manifest_version": 3,
 
@@ -8,12 +8,12 @@
     "content_scripts": [
         {
             "matches": [
-                "https://myanimelist.net/*",
-                "https://anilist.co/*",
-                "https://kitsu.io/*",
-                "https://www.anime-planet.com/*",
-                "https://www.animenewsnetwork.com/encyclopedia/*",
-                "https://anidb.net/*"
+                "*://*.myanimelist.net/*",
+                "*://*.anilist.co/*",
+                "*://*.kitsu.io/*",
+                "*://*.anime-planet.com/*",
+                "*://*.animenewsnetwork.com/encyclopedia/*",
+                "*://*.anidb.net/*"
             ],
             "js": ["main.js"]
         }

@@ -1,6 +1,6 @@
 {
     "name": "nyaa-linker",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Adds a button to Anime and Manga database websites that opens a relevant Nyaa search",
     "scripts": {
         "zip": "cd src && zip -r nyaa-linker.zip . -x manifest-*.json && cd ..",

@@ -29,6 +29,8 @@ select {
     width: 70%;
     background: var(--clrAccent);
     color: var(--clrDark);
+    margin-top: 0.1rem;
+    text-indent: 0.1rem;
 }
 
 #save {

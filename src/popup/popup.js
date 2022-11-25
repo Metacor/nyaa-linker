@@ -23,7 +23,7 @@ document.getElementById('save').onclick = () => {
     chrome.tabs.query({}, (tabs) => {
         const manifestSites = chrome.runtime.getManifest().content_scripts[0].matches;
         for (const tab in tabs) {
-            manifestSites.some((e) => tabs[tab].url.match(e)) && chrome.tabs.reload(tabs[tab].id);
+            manifestSites.some((e) => tabs[tab].url.match(e.split('*://*.').pop())) && chrome.tabs.reload(tabs[tab].id);
         }
         window.close();
     });

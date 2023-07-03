@@ -26,7 +26,15 @@
                 <option value="1_4">Raw</option>
             </select>
 
-            <label for="sort_select">Sort Type:</label>
+            <label for="query_select">Query:</label>
+            <select id="query_select">
+                <option value="default" title="Creates a search using both the 'Exact' and 'Base' options">Default</option>
+                <option value="fuzzy" title="Searches for the site's default title only, without quotes — allows fuzzy matching">Fuzzy</option>
+                <option value="exact" title="Japanese and English full titles — searches for exact title names as written">Exact</option>
+                <option value="base" title="Japanese and English base titles — searches with Seasons and Parts removed">Base</option>
+            </select>
+
+            <label for="sort_select">Sort:</label>
             <select id="sort_select">
                 <option value="comments">Comments</option>
                 <option value="size">Size</option>
@@ -36,11 +44,12 @@
                 <option value="downloads">Downloads</option>
             </select>
 
-            <label for="order_select">Sort Order:</label>
+            <label for="order_select">Order:</label>
             <select id="order_select">
                 <option value="desc">Descending</option>
                 <option value="asc">Ascending</option>
             </select>
+
         </div>
         <button id="save">Save</button>
     </body>

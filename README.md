@@ -1,14 +1,19 @@
-![](src/assets/sites.png)
+![](https://i.imgur.com/MVR68qM.jpg)
 ## What the Extension Does
 -   Adds a "Search on Nyaa" Button to Anime and Manga pages
     -   Sites: **[MyAnimeList](https://i.imgur.com/1hymaOS.png), [AniList](https://i.imgur.com/DtNugQF.png), [Kitsu](https://i.imgur.com/TVKqRcK.png), [Anime-Planet](https://i.imgur.com/zohAYbs.png), [AnimeNewsNetwork](https://i.imgur.com/xOYS17r.png), [AniDB](https://i.imgur.com/pRDcUVh.png)**
--   Search Parameters can be changed and saved in the [Extension Popup window](https://i.imgur.com/oiu0DZW.png)
+-   Search Parameters can be changed and saved in the [Extension Popup window](https://i.imgur.com/bzaChNf.png)
     -   For Manga pages, the Category setting will search for the "Literature" equivalent
     -   All tabs with a supported website currently open will automatically refresh on Save
--   The Search will include both the Japanese(Romaji) & English titles, if they exist and are different
-    -   as well as the base titles of each if the titles include: ("Season"|"Part"|": "|" - ")
-    -   for example, clicking the button on [Shingeki no Kyojin Season 3 Part 2](https://myanimelist.net/anime/38524/Shingeki_no_Kyojin_Season_3_Part_2) will return the search query:
-    -   "Shingeki no Kyojin Season 3 Part 2"|"Attack on Titan Season 3 Part 2"|"Shingeki no Kyojin"|"Attack on Titan"
+
+-   By default the search will include both the Japanese(Romaji) & English titles — if they exist, and they are different
+    -   the search will also add the base titles, if they include: ("Season"|"Part"|": "|" - ")
+        -   for example, clicking the button on [Shingeki no Kyojin Season 3 Part 2](https://myanimelist.net/anime/38524/Shingeki_no_Kyojin_Season_3_Part_2) will return the search query:
+        -  _"Shingeki no Kyojin Season 3 Part 2"|"Attack on Titan Season 3 Part 2"|"Shingeki no Kyojin"|"Attack on Titan"_
+    - _**additional "Query" types are available**: the Default combines both "Exact" and "Base"._
+        - Fuzzy: Searches for the site's default title only, without quotes ~ allows fuzzy matching
+        -   Exact: Japanese and English full titles ~ searches for exact title names as written
+        -   Base: Japanese and English base titles ~ searches with Seasons and Parts removed
 
 # Firefox - [Extension Page](https://addons.mozilla.org/en-US/firefox/addon/nyaa-linker/)
 

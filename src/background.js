@@ -15,6 +15,7 @@ const defaultSettings = () => {
         settings: {
             filter_setting: '0',
             category_setting: '1_2',
+            query_setting: 'default',
             sort_setting: 'seeders',
             order_setting: 'desc',
         },

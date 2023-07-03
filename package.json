@@ -1,11 +1,11 @@
 {
     "name": "nyaa-linker",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "Adds a button to Anime and Manga database websites that opens a relevant Nyaa search",
     "scripts": {
-        "zip": "cd src && zip -r nyaa-linker.zip . -x manifest-*.json && cd ..",
-        "firefox": "mv src/manifest-firefox.json src/manifest.json && npm run zip && mv src/manifest.json src/manifest-firefox.json",
-        "chrome": "mv src/manifest-chrome.json src/manifest.json && npm run zip && mv src/manifest.json src/manifest-chrome.json"
+        "zip": "npm run firefox && npm run chrome",
+        "firefox": "mv src/manifest-firefox.json src/manifest.json && cd src && zip -r nyaa-linker-%npm_package_version%-%npm_lifecycle_event%.zip . -x manifest-*.json && cd .. && mv src/manifest.json src/manifest-firefox.json",
+        "chrome": "mv src/manifest-chrome.json src/manifest.json && cd src && zip -r nyaa-linker-%npm_package_version%-%npm_lifecycle_event%.zip . -x manifest-*.json && cd .. && mv src/manifest.json src/manifest-chrome.json"
     },
     "devDependencies": {
         "eslint": "^8.26.0",
@@ -26,5 +26,5 @@
         "printWidth": 150
     },
     "author": "Metacor <Metacor.Code@gmail.com> (https://github.com/Metacor/nyaa-linker)",
-    "license": "GPLv3"
+    "license": "GPL-3.0-only"
 }

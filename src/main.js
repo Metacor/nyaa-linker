@@ -19,6 +19,7 @@ const searchNyaa = () => {
     chrome.storage.sync.get('settings', (load) => {
         const filter = load.settings.filter_setting;
         let category = load.settings.category_setting;
+        const queryType = load.settings.query_setting;
         const sort = load.settings.sort_setting;
         const order = load.settings.order_setting;
 
@@ -166,51 +167,79 @@ const searchNyaa = () => {
 
         awaitLoadOf('.nyaaBtn').then(() => {
             let query = `"${titleJap}"|"${titleEng}"`;
+            let baseJap = titleJap;
+            let baseEng = titleEng;
 
-            if (!titleEng || titleJap.toLowerCase() === titleEng.toLowerCase()) {
-                query = titleJap;
-            } else {
+            const getBase = () => {
                 const hasSeason = /(?<![\w])(season)(?![\w])/i;
                 const hasNum = /(?<![\w])[0-9]+(?:st|[nr]d|th)(?![\w])/i;
                 const hasWord = /(?<![\w])(first|second|third|fourth|fifth|(the final|final))(?![\w])/i;
                 const hasPart = /(?<![\w])(part)(?![\w])/i;
 
-                if (titleJap.includes(': ') || titleJap.includes(' - ')) {
-                    titleJap.includes(': ') && (query += `|"${titleJap.split(': ').shift()}"`);
-                    titleJap.includes(' - ') && (query += `|"${titleJap.split(' - ').pop()}"`);
+                if (baseJap.includes(': ') || baseJap.includes(' - ')) {
+                    baseJap.includes(': ') && (baseJap = baseJap.split(': ').shift());
+                    baseJap.includes(' - ') && (baseJap = baseJap.split(' - ').pop());
                 } else {
-                    if (hasSeason.test(titleJap)) {
-                        if (hasNum.test(titleJap) || hasWord.test(titleJap)) {
+                    if (hasSeason.test(baseJap)) {
+                        if (hasNum.test(baseJap) || hasWord.test(baseJap)) {
                             let japNum, japWord;
-                            hasNum.test(titleJap) && (japNum = titleJap.match(hasNum)[0]);
-                            hasWord.test(titleJap) && (japWord = titleJap.match(hasWord)[0]);
-                            japNum && (query += `|"${titleJap.split(` ${japNum}`).shift()}"`);
-                            japWord && (query += `|"${titleJap.split(` ${japWord}`).shift()}"`);
+                            hasNum.test(baseJap) && (japNum = baseJap.match(hasNum)[0]);
+                            hasWord.test(baseJap) && (japWord = baseJap.match(hasWord)[0]);
+                            japNum && (baseJap = baseJap.split(` ${japNum}`).shift());
+                            japWord && (baseJap = baseJap.split(` ${japWord}`).shift());
                         } else {
-                            query += `|"${titleJap.split(/( season)/i).shift()}"`;
+                            baseJap = baseJap.split(/( season)/i).shift();
                         }
-                    } else if (hasPart.test(titleJap)) {
-                        query += `|"${titleJap.split(/( part)/i).shift()}"`;
+                    } else if (hasPart.test(baseJap)) {
+                        baseJap = baseJap.split(/( part)/i).shift();
                     }
                 }
 
-                if (titleEng.includes(': ') || titleEng.includes(' - ')) {
-                    titleEng.includes(': ') && (query += `|"${titleEng.split(': ').shift()}"`);
-                    titleEng.includes(' - ') && (query += `|"${titleEng.split(' - ').pop()}"`);
+                if (baseEng.includes(': ') || baseEng.includes(' - ')) {
+                    baseEng.includes(': ') && (baseEng = baseEng.split(': ').shift());
+                    baseEng.includes(' - ') && (baseEng = baseEng.split(' - ').pop());
                 } else {
-                    if (hasSeason.test(titleEng)) {
-                        if (hasNum.test(titleEng) || hasWord.test(titleEng)) {
+                    if (hasSeason.test(baseEng)) {
+                        if (hasNum.test(baseEng) || hasWord.test(baseEng)) {
                             let engNum, engWord;
-                            hasNum.test(titleEng) && (engNum = titleEng.match(hasNum)[0]);
-                            hasWord.test(titleEng) && (engWord = titleEng.match(hasWord)[0]);
-                            engNum && (query += `|"${titleEng.split(` ${engNum}`).shift()}"`);
-                            engWord && (query += `|"${titleEng.split(` ${engWord}`).shift()}"`);
+                            hasNum.test(baseEng) && (engNum = baseEng.match(hasNum)[0]);
+                            hasWord.test(baseEng) && (engWord = baseEng.match(hasWord)[0]);
+                            engNum && (baseEng = baseEng.split(` ${engNum}`).shift());
+                            engWord && (baseEng = baseEng.split(` ${engWord}`).shift());
                         } else {
-                            query += `|"${titleEng.split(/( season)/i).shift()}"`;
+                            baseEng = baseEng.split(/( season)/i).shift();
                         }
-                    } else if (hasPart.test(titleEng)) {
-                        query += `|"${titleEng.split(/( part)/i).shift()}"`;
+                    } else if (hasPart.test(baseEng)) {
+                        baseEng = baseEng.split(/( part)/i).shift();
                     }
+                }
+            };
+
+            if (!titleEng || titleJap.toLowerCase() === titleEng.toLowerCase()) {
+                query = titleJap;
+            } else {
+                getBase();
+
+                switch (queryType) {
+                    case 'default':
+                        if (baseJap == titleJap && baseEng == titleEng) {
+                            break;
+                        } else {
+                            query = `"${titleJap}"|"${titleEng}"|"${baseJap}"|"${baseEng}"`;
+                        }
+                        break;
+                    case 'fuzzy':
+                        query = titleJap;
+                        break;
+                    case 'exact':
+                        break;
+                    case 'base':
+                        if (baseJap == baseEng) {
+                            break;
+                        } else {
+                            query = `"${baseJap}"|"${baseEng}"`;
+                        }
+                        break;
                 }
             }
 

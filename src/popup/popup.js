@@ -3,6 +3,7 @@ window.onload = () => {
         if (load.settings) {
             document.getElementById('filter_select').value = load.settings.filter_setting;
             document.getElementById('category_select').value = load.settings.category_setting;
+            document.getElementById('query_select').value = load.settings.query_setting;
             document.getElementById('sort_select').value = load.settings.sort_setting;
             document.getElementById('order_select').value = load.settings.order_setting;
         }
@@ -13,6 +14,7 @@ const saveSettings = () => {
     const settings = {};
     settings['filter_setting'] = document.getElementById('filter_select').value;
     settings['category_setting'] = document.getElementById('category_select').value;
+    settings['query_setting'] = document.getElementById('query_select').value;
     settings['sort_setting'] = document.getElementById('sort_select').value;
     settings['order_setting'] = document.getElementById('order_select').value;
     return settings;

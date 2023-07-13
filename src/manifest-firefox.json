@@ -1,6 +1,6 @@
 {
     "name": "Nyaa Linker",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "description": "Adds a button to Anime and Manga database websites that opens a relevant Nyaa search",
     "manifest_version": 2,
 
@@ -13,7 +13,8 @@
                 "*://*.kitsu.io/*",
                 "*://*.anime-planet.com/*",
                 "*://*.animenewsnetwork.com/encyclopedia/*",
-                "*://*.anidb.net/*"
+                "*://*.anidb.net/*",
+                "*://*.livechart.me/*"
             ],
             "js": ["main.js"]
         }

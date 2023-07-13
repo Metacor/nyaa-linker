@@ -17,24 +17,27 @@
 body {
     background: var(--clrDark);
     color: var(--clrLight);
+    width: max-content;
 }
 
 .container {
-    width: 275px;
-    margin: 0.5em 0.75em;
+    display: grid;
+    grid-template-columns: max-content max-content;
+    grid-gap: 2px;
+    margin: 2px 0 5px 2px;
     text-align: right;
 }
 
 select {
-    width: 75%;
     background: var(--clrAccent);
     color: var(--clrDark);
-    margin-top: 0.1rem;
-    text-indent: 0.1rem;
+    margin-right: 2px;
+    text-indent: 2px;
+    width: 100%;
 }
 
 #save {
-    width: 100%;
     background: var(--clrAccent);
     color: var(--clrDark);
+    width: 100%;
 }

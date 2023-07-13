@@ -130,14 +130,14 @@ const searchNyaa = () => {
                     document.querySelector('.nyaaBtn') && document.querySelector('.nyaaBtn').remove();
                     createBtn(btnSpace);
                     btn.style.cssText = `
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        height: 35px;
-                        border-radius: 3px;
-                        background: rgb(var(--color-blue));
-                        color: #fff;
-                        margin-bottom: 20px;`;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            height: 35px;
+                            border-radius: 3px;
+                            background: rgb(var(--color-blue));
+                            color: #fff;
+                            margin-bottom: 20px;`;
                 });
                 break;
 
@@ -163,6 +163,56 @@ const searchNyaa = () => {
                     btn.style.background = '#f5725f';
                 });
                 break;
+
+            case domain.includes('livechart.me'):
+                setTimeout(() => {
+                    if (domain.includes(`livechart.me/${media}/`)) {
+                        tempEng = document.querySelector('h4 small');
+                        titleEng = tempEng.innerText;
+                        tempEng.textContent = '';
+                        titleJap = document.querySelector('h4').innerText;
+                        tempEng.textContent = titleEng;
+
+                        btnContainer = document.querySelector('#content > div.row div.text-center');
+                        btnSpace = btnContainer.parentNode.insertBefore(document.createElement('div'), btnContainer);
+                        createBtn(btnSpace);
+                        btn.classList.add('button', 'expanded');
+                    } else if (domain.includes("livechart.me/franchises/")) {
+                        console.log("FUCK");
+                        for (const card of document.querySelectorAll('.lc-anime')) {
+                            titleJap = card.querySelector('.lc-anime-card--title').innerText;
+                            btnContainer = card.querySelector('.lc-anime-card--related-links');
+                            btnSpace = btnContainer.appendChild(document.createElement('li'));
+
+                            createBtn(btnSpace);
+                            btn.style.backgroundImage = 'url(https://i.imgur.com/9Fr2BRG.png)';
+                            btn.style.backgroundSize = '20px';
+                            btn.style.backgroundRepeat = 'no-repeat';
+                            btn.style.backgroundPosition = 'center';
+                            btn.classList.add('website-icon');
+
+                            btn.href = `https://nyaa.si/?f=${filter}&c=${category}&q=${titleJap}&s=${sort}&o=${order}`;
+                            btn.target = '_blank';
+                        }
+                    } else {
+                        for (const card of document.querySelectorAll('.anime-card')) {
+                            titleJap = card.querySelector('.main-title').innerText;
+                            btnContainer = card.querySelector('.related-links');
+                            btnSpace = btnContainer.appendChild(document.createElement('li'));
+
+                            createBtn(btnSpace);
+                            btn.style.backgroundImage = 'url(https://i.imgur.com/9Fr2BRG.png)';
+                            btn.style.backgroundSize = '20px';
+                            btn.style.backgroundRepeat = 'no-repeat';
+                            btn.style.backgroundPosition = 'center';
+                            btn.classList.add('website-icon');
+
+                            btn.href = `https://nyaa.si/?f=${filter}&c=${category}&q=${titleJap}&s=${sort}&o=${order}`;
+                            btn.target = '_blank';
+                        }
+                    }
+                }, 50);
+                break;
         }
 
         awaitLoadOf('.nyaaBtn').then(() => {
@@ -174,7 +224,8 @@ const searchNyaa = () => {
                 const hasSeason = /(?<![\w])(season)(?![\w])/i;
                 const hasNum = /(?<![\w])[0-9]+(?:st|[nr]d|th)(?![\w])/i;
                 const hasWord = /(?<![\w])(first|second|third|fourth|fifth|(the final|final))(?![\w])/i;
-                const hasPart = /(?<![\w])(part)(?![\w])/i;
+                const hasPart = /(?<![\w])(part )/i;
+                const hasEndPunc = /[?!.]$/;
 
                 if (baseJap.includes(': ') || baseJap.includes(' - ')) {
                     baseJap.includes(': ') && (baseJap = baseJap.split(': ').shift());
@@ -192,6 +243,10 @@ const searchNyaa = () => {
                         }
                     } else if (hasPart.test(baseJap)) {
                         baseJap = baseJap.split(/( part)/i).shift();
+                    } else if (hasEndPunc.test(baseJap)) {
+                        console.log('loldude');
+                        let japEndPunc = baseJap.match(hasEndPunc)[0];
+                        baseJap = baseJap.split(japEndPunc).shift();
                     }
                 }
 
@@ -211,6 +266,10 @@ const searchNyaa = () => {
                         }
                     } else if (hasPart.test(baseEng)) {
                         baseEng = baseEng.split(/( part)/i).shift();
+                    } else if (hasEndPunc.test(baseEng)) {
+                        console.log('OKAAAAAAAAAAAY DUDE');
+                        let engEndPunc = baseEng.match(hasEndPunc)[0];
+                        baseEng = baseEng.split(engEndPunc).shift();
                     }
                 }
             };

@@ -130,14 +130,14 @@ const searchNyaa = () => {
                     document.querySelector('.nyaaBtn') && document.querySelector('.nyaaBtn').remove();
                     createBtn(btnSpace);
                     btn.style.cssText = `
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            height: 35px;
-                            border-radius: 3px;
-                            background: rgb(var(--color-blue));
-                            color: #fff;
-                            margin-bottom: 20px;`;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 35px;
+                        border-radius: 3px;
+                        background: rgb(var(--color-blue));
+                        color: #fff;
+                        margin-bottom: 20px;`;
                 });
                 break;
 
@@ -178,7 +178,6 @@ const searchNyaa = () => {
                         createBtn(btnSpace);
                         btn.classList.add('button', 'expanded');
                     } else if (domain.includes("livechart.me/franchises/")) {
-                        console.log("FUCK");
                         for (const card of document.querySelectorAll('.lc-anime')) {
                             titleJap = card.querySelector('.lc-anime-card--title').innerText;
                             btnContainer = card.querySelector('.lc-anime-card--related-links');
@@ -244,7 +243,6 @@ const searchNyaa = () => {
                     } else if (hasPart.test(baseJap)) {
                         baseJap = baseJap.split(/( part)/i).shift();
                     } else if (hasEndPunc.test(baseJap)) {
-                        console.log('loldude');
                         let japEndPunc = baseJap.match(hasEndPunc)[0];
                         baseJap = baseJap.split(japEndPunc).shift();
                     }
@@ -267,7 +265,6 @@ const searchNyaa = () => {
                     } else if (hasPart.test(baseEng)) {
                         baseEng = baseEng.split(/( part)/i).shift();
                     } else if (hasEndPunc.test(baseEng)) {
-                        console.log('OKAAAAAAAAAAAY DUDE');
                         let engEndPunc = baseEng.match(hasEndPunc)[0];
                         baseEng = baseEng.split(engEndPunc).shift();
                     }

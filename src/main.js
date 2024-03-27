@@ -167,46 +167,48 @@ const searchNyaa = () => {
             case domain.includes('livechart.me'):
                 setTimeout(() => {
                     if (domain.includes(`livechart.me/${media}/`)) {
-                        tempEng = document.querySelector('h4 small');
-                        titleEng = tempEng.innerText;
-                        tempEng.textContent = '';
-                        titleJap = document.querySelector('h4').innerText;
-                        tempEng.textContent = titleEng;
+                        titleJap = document.querySelector('.grow .text-xl').innerText;
+                        titleEng = document.querySelector('.grow .text-lg').innerText;
 
-                        btnContainer = document.querySelector('#content > div.row div.text-center');
-                        btnSpace = btnContainer.parentNode.insertBefore(document.createElement('div'), btnContainer);
+                        btnSpace = document.querySelector('.lc-poster-col');
                         createBtn(btnSpace);
-                        btn.classList.add('button', 'expanded');
-                    } else if (domain.includes("livechart.me/franchises/")) {
+                        btn.classList.add('lc-btn', 'lc-btn-sm', 'lc-btn-outline');
+                    } else if (domain.includes('livechart.me/franchises/')) {
                         for (const card of document.querySelectorAll('.lc-anime')) {
-                            titleJap = card.querySelector('.lc-anime-card--title').innerText;
-                            btnContainer = card.querySelector('.lc-anime-card--related-links');
-                            btnSpace = btnContainer.appendChild(document.createElement('li'));
+                            titleJap = card.getAttribute('data-romaji');
+                            titleEng = card.getAttribute('data-english');
 
+                            let tempQuery;
+                            titleEng == null ? (tempQuery = titleJap) : (tempQuery = `"${titleJap}"|"${titleEng}"`);
+
+                            btnSpace = card.querySelector('.lc-anime-card--related-links');
                             createBtn(btnSpace);
                             btn.style.backgroundImage = 'url(https://i.imgur.com/9Fr2BRG.png)';
                             btn.style.backgroundSize = '20px';
                             btn.style.backgroundRepeat = 'no-repeat';
                             btn.style.backgroundPosition = 'center';
-                            btn.classList.add('website-icon');
-
-                            btn.href = `https://nyaa.si/?f=${filter}&c=${category}&q=${titleJap}&s=${sort}&o=${order}`;
+                            btn.classList.add('lc-anime-card--related-links--action-button');
+                            btn.title = 'Search on Nyaa';
+                            btn.href = `https://nyaa.si/?f=${filter}&c=${category}&q=${tempQuery}&s=${sort}&o=${order}`;
                             btn.target = '_blank';
                         }
                     } else {
-                        for (const card of document.querySelectorAll('.anime-card')) {
-                            titleJap = card.querySelector('.main-title').innerText;
-                            btnContainer = card.querySelector('.related-links');
-                            btnSpace = btnContainer.appendChild(document.createElement('li'));
+                        for (const card of document.querySelectorAll('.anime')) {
+                            titleJap = card.getAttribute('data-romaji');
+                            titleEng = card.getAttribute('data-english');
 
+                            let tempQuery;
+                            titleEng == null ? (tempQuery = titleJap) : (tempQuery = `"${titleJap}"|"${titleEng}"`);
+
+                            btnSpace = card.querySelector('.related-links');
                             createBtn(btnSpace);
                             btn.style.backgroundImage = 'url(https://i.imgur.com/9Fr2BRG.png)';
                             btn.style.backgroundSize = '20px';
                             btn.style.backgroundRepeat = 'no-repeat';
                             btn.style.backgroundPosition = 'center';
-                            btn.classList.add('website-icon');
-
-                            btn.href = `https://nyaa.si/?f=${filter}&c=${category}&q=${titleJap}&s=${sort}&o=${order}`;
+                            btn.classList.add('action-button');
+                            btn.title = 'Search on Nyaa';
+                            btn.href = `https://nyaa.si/?f=${filter}&c=${category}&q=${tempQuery}&s=${sort}&o=${order}`;
                             btn.target = '_blank';
                         }
                     }

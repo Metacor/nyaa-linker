@@ -1,11 +1,11 @@
 {
     "name": "nyaa-linker",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Adds a button to Anime and Manga database websites that opens a relevant Nyaa search",
     "scripts": {
         "zip": "npm run firefox && npm run chrome",
-        "firefox": "mv src/manifest-firefox.json src/manifest.json && cd src && zip -r ..\\nyaa-linker-%npm_package_version%-%npm_lifecycle_event%.zip . -x manifest-*.json && cd .. && mv src/manifest.json src/manifest-firefox.json",
-        "chrome": "mv src/manifest-chrome.json src/manifest.json && cd src && zip -r ..\\nyaa-linker-%npm_package_version%-%npm_lifecycle_event%.zip . -x manifest-*.json && cd .. && mv src/manifest.json src/manifest-chrome.json"
+        "firefox": "mv src/manifest-firefox.json src/manifest.json && cd src && 7z a ..\\nyaa-linker-%npm_package_version%-%npm_lifecycle_event%.zip * -r -x!manifest-*.json && cd .. && mv src/manifest.json src/manifest-firefox.json",
+        "chrome": "mv src/manifest-chrome.json src/manifest.json && cd src && 7z a ..\\nyaa-linker-%npm_package_version%-%npm_lifecycle_event%.zip * -r -x!manifest-*.json && cd .. && mv src/manifest.json src/manifest-chrome.json"
     },
     "devDependencies": {
         "eslint": "^8.26.0",

@@ -38,26 +38,42 @@ const searchNyaa = () => {
         };
 
         switch (true) {
-            case domain.includes(`myanimelist.net/${media}/`):
-                const engCheck = document.querySelector('.title-english');
-                engCheck && (titleEng = engCheck.textContent);
+            case domain.includes(`myanimelist.net`):
+                const malMain = new RegExp(`myanimelist\\.net/${media}/\\d+`);
+                if (malMain.test(domain)) {
+                    const engCheck = document.querySelector('.title-english');
+                    engCheck && (titleEng = engCheck.textContent);
 
-                if (media === 'manga') {
-                    const titleElm = document.querySelector('[itemprop="name"]');
-                    titleJap = titleElm.textContent;
-                    if (engCheck) {
-                        (engCheck.textContent = ''), (titleJap = titleElm.textContent), (engCheck.textContent = titleEng);
+                    if (media === 'manga') {
+                        const titleElm = document.querySelector('[itemprop="name"]');
+                        titleJap = titleElm.textContent;
+                        if (engCheck) {
+                            (engCheck.textContent = ''), (titleJap = titleElm.textContent), (engCheck.textContent = titleEng);
+                        }
+                    } else {
+                        titleJap = document.querySelector('.title-name > strong').textContent;
                     }
-                } else {
-                    titleJap = document.querySelector('.title-name > strong').textContent;
-                }
 
-                btnSpace = document.getElementById('broadcast-block')
-                    ? document.getElementById('broadcast-block')
-                    : document.querySelector('.leftside').children[0];
-                createBtn();
-                btn.style.marginTop = '4px';
-                btn.classList.add('left-info-block-broadcast-button');
+                    btnSpace = document.getElementById('broadcast-block')
+                        ? document.getElementById('broadcast-block')
+                        : document.querySelector('.leftside').children[0];
+                    createBtn();
+                    btn.style.marginTop = '4px';
+                    btn.classList.add('left-info-block-broadcast-button');
+                }
+                if (domain.includes(`/genre`) || domain.includes(`/season`) || domain.includes('/magazine')) {
+                    for (const card of document.querySelectorAll('.seasonal-anime')) {
+                        titleJap = card.querySelector('.title').innerText;
+
+                        btnSpace = card.querySelector('.broadcast');
+                        createBtn(btnSpace);
+                        btn.style.background = 'url(https://i.imgur.com/9Fr2BRG.png) center/20px no-repeat';
+                        btn.style.padding = '0 11px';
+                        btn.title = 'Search on Nyaa';
+                        btn.href = `https://nyaa.si/?f=${filter}&c=${category}&q=${titleJap}&s=${sort}&o=${order}`;
+                        btn.target = '_blank';
+                    }
+                }
                 break;
 
             case domain.includes(`anime-planet.com/${media}/`):
@@ -183,10 +199,7 @@ const searchNyaa = () => {
 
                             btnSpace = card.querySelector('.lc-anime-card--related-links');
                             createBtn(btnSpace);
-                            btn.style.backgroundImage = 'url(https://i.imgur.com/9Fr2BRG.png)';
-                            btn.style.backgroundSize = '20px';
-                            btn.style.backgroundRepeat = 'no-repeat';
-                            btn.style.backgroundPosition = 'center';
+                            btn.style.background = 'url(https://i.imgur.com/9Fr2BRG.png) center/20px no-repeat';
                             btn.classList.add('lc-anime-card--related-links--action-button');
                             btn.title = 'Search on Nyaa';
                             btn.href = `https://nyaa.si/?f=${filter}&c=${category}&q=${tempQuery}&s=${sort}&o=${order}`;
@@ -202,10 +215,7 @@ const searchNyaa = () => {
 
                             btnSpace = card.querySelector('.related-links');
                             createBtn(btnSpace);
-                            btn.style.backgroundImage = 'url(https://i.imgur.com/9Fr2BRG.png)';
-                            btn.style.backgroundSize = '20px';
-                            btn.style.backgroundRepeat = 'no-repeat';
-                            btn.style.backgroundPosition = 'center';
+                            btn.style.background = 'url(https://i.imgur.com/9Fr2BRG.png) center/20px no-repeat';
                             btn.classList.add('action-button');
                             btn.title = 'Search on Nyaa';
                             btn.href = `https://nyaa.si/?f=${filter}&c=${category}&q=${tempQuery}&s=${sort}&o=${order}`;

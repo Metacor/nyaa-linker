@@ -1,28 +1,32 @@
-![](https://i.imgur.com/MVR68qM.jpg)
+![](https://i.imgur.com/DXMg8ha.png)
 
 ## What the Extension Does
 
--   Adds a "Search on Nyaa" Button to Anime and Manga pages
-    -   Sites: **[MyAnimeList](https://i.imgur.com/1hymaOS.png), [AniList](https://i.imgur.com/DtNugQF.png), [Kitsu](https://i.imgur.com/TVKqRcK.png), [Anime-Planet](https://i.imgur.com/zohAYbs.png), [AnimeNewsNetwork](https://i.imgur.com/xOYS17r.png), [AniDB](https://i.imgur.com/pRDcUVh.png), [LiveChart](https://imgur.com/plZxpBN)**
--   Search Parameters can be changed and saved in the [Extension Popup window](https://i.imgur.com/bzaChNf.png)
+-   Adds a "Search on Nyaa" Button to Anime and Manga database pages
+    -   Individual: **[MyAnimeList](https://i.imgur.com/IXJ7XuK.png), [AniList](https://i.imgur.com/9xhFu5q.jpeg), [Anime-Planet](https://i.imgur.com/sGsl0Bw.png), [AnimeNewsNetwork](https://i.imgur.com/xXvJXHC.png), [LiveChart](https://i.imgur.com/VyIWtLC.png), [AniDB](https://i.imgur.com/DqSkmOg.jpeg), [Kitsu](https://i.imgur.com/CN2kh4C.jpeg)**
+    -   Card-type: _**MyAnimeList** ([Season](https://i.imgur.com/7M4hr0z.png), [Genre](https://i.imgur.com/SklbImH.png)), **LiveChart** ([Season](https://i.imgur.com/wvLOp8N.jpeg), [Franchises](https://i.imgur.com/wcNv1JC.jpeg))_
+-   Extension settings can be customized and saved in the [Extension Popup window](https://i.imgur.com/ymIkV63.png)
 
-    -   For Manga pages, the Category setting will search for the "Literature" equivalent
-    -   All tabs with a supported website currently open will automatically refresh on Save
+    -   The primary settings page is used to change Nyaa search parameters
+        -   For Manga pages, the Category setting will search for the "Literature" equivalent
+    -   The secondary page is used to change extension behavior _(accessed by clicking the cog icon)_
+        -   The Hotkey can be used to activate the button _(even when "Hide Button" is enabled)_
+    -   All browser tabs containing a supported website will refresh after pressing the save button
 
--   By default the search will include both the Japanese(Romaji) & English titles — if they exist, and they are different
-    -   the search will also add the base titles, if they include: ("Season"|"Part"|": "|" - ")
-        -   for example, clicking the button on [Shingeki no Kyojin Season 3 Part 2](https://myanimelist.net/anime/38524/Shingeki_no_Kyojin_Season_3_Part_2) will return the search query:
-        -   _"Shingeki no Kyojin Season 3 Part 2"|"Attack on Titan Season 3 Part 2"|"Shingeki no Kyojin"|"Attack on Titan"_
-    -   _**additional "Query" types are available**: the Default combines both "Exact" and "Base"._
-        -   Fuzzy: Searches for the site's default title only, without quotes ~ allows fuzzy matching
-        -   Exact: Japanese and English full titles ~ searches for exact title names as written
-        -   Base: Japanese and English base titles ~ searches with Seasons and Parts removed
+-   Additional Query types are available: _"Default" combines "Exact" and "Base"_.
+
+    -   Fuzzy: Searches for the site's default title only, without quotes ~ allows fuzzy matching
+    -   Exact: Japanese and English full titles ~ searches for exact title names as written
+    -   Base: Japanese and English base titles ~ searches with Seasons and Parts removed
+
+-   "Default" search example: clicking the button on [Shingeki no Kyojin Season 3 Part 2](https://myanimelist.net/anime/38524/Shingeki_no_Kyojin_Season_3_Part_2) will search Nyaa for:
+    -   _"Shingeki no Kyojin Season 3 Part 2"|"Attack on Titan Season 3 Part 2"|"Shingeki no Kyojin"|"Attack on Titan"_
 
 # Firefox - [Extension Page](https://addons.mozilla.org/en-US/firefox/addon/nyaa-linker/)
 
 # Chrome - ~~Extension Page~~
 
-> I don't have a Chrome Developer Account, Chrome Users will need to manually install the Extension for now
+> I don't have a Chrome Developer Account, Chrome Users will need to manually install the Extension
 
 -   Download Chrome.zip from the [Latest Release](https://github.com/Metacor/nyaa-linker/releases)
 -   [Enable "Developer mode" in Chrome](https://i.imgur.com/h7kvj1h.png)

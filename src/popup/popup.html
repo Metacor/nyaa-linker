@@ -10,7 +10,7 @@
     </head>
 
     <body>
-        <div class="container">
+        <div id="parametersPage">
             <label for="filter_select">Filter:</label>
             <select id="filter_select">
                 <option value="0">No Filter</option>
@@ -51,6 +51,29 @@
             </select>
 
         </div>
-        <button id="save">Save</button>
-    </body>
+        <div id="bottomButtons">
+            <button id="saveButton">Save</button>
+            <button id="settingsButton"></button>
+        </div>
+
+        <div id="settingsPage">
+                <label for="hide_button_select">Hide Button:</label>
+                <input type="checkbox" id="hide_button_select" title="Stops the 'Search on Nyaa' buttom from being rendered">
+
+                <label for="focus_select">Maintain Focus:</label>
+                <input type="checkbox" id="focus_select" title="Changes Tab Focus behavior when using the Hotkey">
+                
+                <label for="hotkey_key_select">Hotkey:</label>
+                <input type="text" maxlength="1" placeholder="?" id="hotkey_key_select">
+                
+                <label for="hotkey_modifier_select">Modifier Key:</label>
+                <select id="hotkey_modifier_select">
+                    <option value="">None</option>
+                    <option value="shiftKey">Shift</option>
+                    <option value="ctrlKey">Control</option>
+                    <option value="altKey">Alt</option>
+                </select>
+
+        </div>
 </html>
+

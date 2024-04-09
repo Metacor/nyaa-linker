@@ -1,8 +1,7 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    const cringeSites = ['kitsu.io/*', 'anilist.co/*'];
-    const skip = ['/episodes', '/chapters', '/characters', '/watch', '/reactions', '/franchise', '/staff', '/reviews', '/stats', '/social'];
-    for (const site in cringeSites) {
-        if (changeInfo.status === 'complete' && tab.url.match(cringeSites[site]) && !skip.some((e) => tab.url.includes(e))) {
+    const manifestSites = chrome.runtime.getManifest().content_scripts[0].matches;
+    if (changeInfo.status === 'complete') {
+        if (manifestSites.some((site) => tab.url.match(site.split('*://*.').pop()))) {
             chrome.tabs.sendMessage(tabId, { type: 'tabUpdated', url: tab.url });
         }
     }
@@ -18,6 +17,10 @@ const defaultSettings = () => {
             query_setting: 'default',
             sort_setting: 'seeders',
             order_setting: 'desc',
+            hide_button_setting: false,
+            focus_setting: false,
+            hotkey_key_setting: '',
+            hotkey_modifier_setting: '',
         },
     });
 };

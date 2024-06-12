@@ -18,12 +18,32 @@ body {
     background: var(--clrDark);
     color: var(--clrLight);
     width: max-content;
+    font-family: sans-serif;
+}
+
+#parametersPage,
+#settingsPage {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    gap: 2px;
+    padding: 2px 0 2px 2px;
+    text-align: right;
+}
+
+#settingsPage {
+    display: none;
+    border: 1px solid var(--clrAccent);
+    border-top: none;
+    padding-left: 25px;
 }
 
 button,
 input,
-select {
+select,
+option {
     cursor: pointer;
+    text-align: center;
+    height: 21px;
 }
 
 select,
@@ -35,7 +55,7 @@ select,
 
 option,
 #settingsPage {
-    background-color: var(--clrDark);
+    background: var(--clrDark);
     color: var(--clrAccent);
 }
 
@@ -45,7 +65,7 @@ option,
 }
 
 #saveButton {
-    flex: 13;
+    flex: 11;
 }
 
 #settingsButton {
@@ -53,35 +73,13 @@ option,
     flex: 1;
 }
 
-#parametersPage {
-    display: grid;
-    margin: 2px 0 2px 2px;
-}
-
-#parametersPage,
-#settingsPage {
-    grid-template-columns: max-content max-content;
-    gap: 2px;
-    text-align: right;
-}
-
-#settingsPage {
-    display: none;
-    border: 1px solid var(--clrAccent);
-    position: fixed;
-    padding: 5px 25px;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 85%;
-}
-
-#hide_button_select,
 #hotkey_key_select,
-#focus_select {
-    width: 24px;
-    height: 24px;
-    text-align: center;
-    align-self: center;
+input[type='checkbox'] {
+    width: 21px;
     justify-self: left;
+}
+
+#hotkey_modifier_select,
+#hotkey_query_select {
+    width: 150%;
 }

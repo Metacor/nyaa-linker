@@ -58,7 +58,7 @@
 
         <div id="settingsPage">
                 <label for="hide_button_select">Hide Button:</label>
-                <input type="checkbox" id="hide_button_select" title="Stops the 'Search on Nyaa' buttom from being rendered">
+                <input type="checkbox" id="hide_button_select" title="Stops the 'Search on Nyaa' button from being rendered">
 
                 <label for="focus_select">Maintain Focus:</label>
                 <input type="checkbox" id="focus_select" title="Changes Tab Focus behavior when using the Hotkey">
@@ -66,12 +66,21 @@
                 <label for="hotkey_key_select">Hotkey:</label>
                 <input type="text" maxlength="1" placeholder="?" id="hotkey_key_select">
                 
-                <label for="hotkey_modifier_select">Modifier Key:</label>
+                <label for="hotkey_modifier_select">Hotkey Modifier:</label>
                 <select id="hotkey_modifier_select">
                     <option value="">None</option>
                     <option value="shiftKey">Shift</option>
                     <option value="ctrlKey">Control</option>
                     <option value="altKey">Alt</option>
+                </select>
+                
+                <label for="hotkey_query_select">Hotkey Query:</label>
+                <select id="hotkey_query_select">
+                    <option value="inherit" title="Inherits its behavior from the Query option on the primary settings page">Inherit</option>
+                    <option value="default" title="Creates a search using both the 'Exact' and 'Base' options">Default</option>
+                    <option value="fuzzy" title="Searches for the site's default title only, without quotes — allows fuzzy matching">Fuzzy</option>
+                    <option value="exact" title="Japanese and English full titles — searches for exact title names as written">Exact</option>
+                    <option value="base" title="Japanese and English base titles — searches with Seasons and Parts removed">Base</option>
                 </select>
 
         </div>

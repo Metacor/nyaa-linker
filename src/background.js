@@ -21,6 +21,7 @@ const defaultSettings = () => {
             focus_setting: false,
             hotkey_key_setting: '',
             hotkey_modifier_setting: '',
+            hotkey_query_setting: 'inherit',
         },
     });
 };

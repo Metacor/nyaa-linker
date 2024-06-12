@@ -5,7 +5,7 @@
 -   Adds a "Search on Nyaa" Button to Anime and Manga database pages
     -   Individual: **[MyAnimeList](https://i.imgur.com/IXJ7XuK.png), [AniList](https://i.imgur.com/9xhFu5q.jpeg), [Anime-Planet](https://i.imgur.com/sGsl0Bw.png), [AnimeNewsNetwork](https://i.imgur.com/xXvJXHC.png), [LiveChart](https://i.imgur.com/VyIWtLC.png), [AniDB](https://i.imgur.com/DqSkmOg.jpeg), [Kitsu](https://i.imgur.com/CN2kh4C.jpeg)**
     -   Card-type: _**MyAnimeList** ([Season](https://i.imgur.com/7M4hr0z.png), [Genre](https://i.imgur.com/SklbImH.png)), **LiveChart** ([Season](https://i.imgur.com/wvLOp8N.jpeg), [Franchises](https://i.imgur.com/wcNv1JC.jpeg))_
--   Extension settings can be customized and saved in the [Extension Popup window](https://i.imgur.com/ymIkV63.png)
+-   Extension settings can be customized and saved in the [Extension Popup window](https://i.imgur.com/Ezz4S6x.png)
 
     -   The primary settings page is used to change Nyaa search parameters
         -   For Manga pages, the Category setting will search for the "Literature" equivalent

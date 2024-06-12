@@ -1,5 +1,10 @@
-chrome.runtime.onMessage.addListener((request) => request.type === 'tabUpdated' && init());
-let activeListener;
+let btn, currentPage, previousPage, hotkeyListener;
+chrome.runtime.onMessage.addListener((request) => {
+    if (request.type === 'tabUpdated') {
+        currentPage = window.location.href.split('/')[4];
+        (!btn || currentPage !== previousPage) && init();
+    }
+});
 
 async function init() {
     const loadUserSettings = await new Promise((resolve) => {
@@ -8,6 +13,7 @@ async function init() {
         });
     });
 
+    previousPage = currentPage;
     const settings = loadUserSettings.settings;
     searchNyaa(settings);
 }
@@ -15,8 +21,8 @@ async function init() {
 function searchNyaa(settings) {
     const domain = window.location.href;
     const media = window.location.pathname.includes('manga') ? 'manga' : 'anime';
+    let titleJap, titleEng, btnSpace, cardType, cardFlag;
     let queryType = settings.query_setting;
-    let titleJap, titleEng, btn, btnSpace, cardType;
 
     if (media === 'manga') {
         const searchManga = (cat) => {
@@ -26,32 +32,38 @@ function searchNyaa(settings) {
         settings.category_setting = searchManga(settings.category_setting);
     }
 
-    function createSearch(query) {
-        if (btn) {
-            !btn.title && (btn.textContent = 'Search on Nyaa');
-            btn.href = `https://nyaa.si/?f=${settings.filter_setting}&c=${settings.category_setting}&q=${query}&s=${settings.sort_setting}&o=${settings.order_setting}`;
-            btn.target = '_blank';
-        }
-    }
-
     function createBtn(btnSpace) {
-        !cardType && document.querySelector('.nyaaBtn') && document.querySelector('.nyaaBtn').remove();
+        !cardFlag && document.querySelector('.nyaaBtn') && document.querySelectorAll('.nyaaBtn').forEach((e) => e.remove()), (cardFlag = true);
         btn = btnSpace.appendChild(document.createElement('a'));
         btn.classList.add('nyaaBtn');
         settings.hide_button_setting && (btn.style.display = 'none');
+        !cardType && settings.hotkey_key_setting && startHotkeyListener();
     }
 
-    if (!activeListener && settings.hotkey_key_setting) {
-        document.addEventListener('keydown', function (e) {
+    function createSearch(query) {
+        !btn.title && (btn.textContent = 'Search on Nyaa');
+        btn.href = `https://nyaa.si/?f=${settings.filter_setting}&c=${settings.category_setting}&q=${query}&s=${settings.sort_setting}&o=${settings.order_setting}`;
+        btn.target = '_blank';
+    }
+
+    function startHotkeyListener() {
+        hotkeyListener && document.removeEventListener('keydown', hotkeyListener);
+        hotkeyListener = (e) => {
             if (
-                (btn && e[settings.hotkey_modifier_setting] && e.key.toLowerCase() == settings.hotkey_key_setting) ||
-                (btn && settings.hotkey_modifier_setting === '' && !e.ctrlKey && !e.shiftKey && !e.altKey && e.key == settings.hotkey_key_setting)
+                (btn && e[settings.hotkey_modifier_setting] && e.key.toLowerCase() === settings.hotkey_key_setting) ||
+                (btn && settings.hotkey_modifier_setting === '' && !e.ctrlKey && !e.shiftKey && !e.altKey && e.key === settings.hotkey_key_setting)
             ) {
-                document.querySelector('.nyaaBtn').dispatchEvent(new MouseEvent('click', { ctrlKey: settings.focus_setting }));
+                if (settings.hotkey_query_setting !== 'inherit') {
+                    queryType = settings.hotkey_query_setting;
+                    createSearch(getQuery(titleJap, titleEng, queryType));
+                }
+                btn.dispatchEvent(new MouseEvent('click', { ctrlKey: settings.focus_setting }));
                 e.preventDefault();
+                queryType = settings.query_setting;
+                createSearch(getQuery(titleJap, titleEng, queryType));
             }
-        });
-        activeListener = true;
+        };
+        document.addEventListener('keydown', hotkeyListener);
     }
 
     switch (true) {
@@ -87,9 +99,9 @@ function searchNyaa(settings) {
                     card.querySelector('.title h3') ? (titleEng = card.querySelector('.title h3').innerText) : (titleEng = undefined);
 
                     createBtn(card.querySelector('.broadcast'));
+                    btn.title = 'Search on Nyaa';
                     btn.style.background = 'url(https://i.imgur.com/9Fr2BRG.png) center/20px no-repeat';
                     btn.style.padding = '0 11px';
-                    btn.title = 'Search on Nyaa';
                     createSearch(getQuery(titleJap, titleEng, queryType));
                 }
             }
@@ -129,16 +141,15 @@ function searchNyaa(settings) {
 
                 btnSpace = document.querySelector('.fright') ? document.querySelector('.fright') : document.querySelector('#big-video');
                 createBtn(btnSpace);
-                btn.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: 35px;
-                    border-radius: 3px;
-                    background: #2d50a7;
-                    color: #fff;
-                    border: 1px solid black;
-                    text-decoration: none;`;
+                btn.style.display !== 'none' && (btn.style.display = 'flex');
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'center';
+                btn.style.height = '35px';
+                btn.style.borderRadius = '3px';
+                btn.style.background = '#2d50a7';
+                btn.style.color = '#fff';
+                btn.style.border = '1px solid black';
+                btn.style.textDecoration = 'none';
                 btnSpace.children[0].tagName === 'TABLE' && (btn.style.marginTop = '4px');
                 createSearch(getQuery(titleJap, titleEng, queryType));
             }, 50);
@@ -170,15 +181,14 @@ function searchNyaa(settings) {
                 }
 
                 createBtn(document.querySelector('.cover-wrap-inner'));
-                btn.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: 35px;
-                    border-radius: 3px;
-                    margin-bottom: 20px;
-                    background: rgb(var(--color-blue));
-                    color: rgb(var(--color-white));`;
+                btn.style.display !== 'none' && (btn.style.display = 'flex');
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'center';
+                btn.style.height = '35px';
+                btn.style.borderRadius = '3px';
+                btn.style.marginBottom = '20px';
+                btn.style.background = 'rgb(var(--color-blue))';
+                btn.style.color = 'rgb(var(--color-white))';
                 createSearch(getQuery(titleJap, titleEng, queryType));
             });
             break;

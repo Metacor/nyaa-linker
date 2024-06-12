@@ -1,6 +1,6 @@
 {
     "name": "Nyaa Linker",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "Adds a button to Anime and Manga database websites that opens a relevant Nyaa search",
     "manifest_version": 3,
 

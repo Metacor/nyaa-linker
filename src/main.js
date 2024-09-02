@@ -42,6 +42,7 @@ function searchNyaa(settings) {
 
     function createSearch(query) {
         !btn.title && (btn.textContent = 'Search on Nyaa');
+        (query.includes('&') || query.includes('+')) && (query = query.replace(/&/g, '%26').replace(/\+/g, '%2B'));
         btn.href = `https://nyaa.si/?f=${settings.filter_setting}&c=${settings.category_setting}&q=${query}&s=${settings.sort_setting}&o=${settings.order_setting}`;
         btn.target = '_blank';
     }
@@ -193,7 +194,7 @@ function searchNyaa(settings) {
             });
             break;
 
-        case domain.includes(`kitsu.io/${media}/`):
+        case domain.includes(`kitsu.app/${media}/`):
             awaitLoadOf('.media--information', 'Japanese (Romaji)', () => {
                 let titleUsa;
                 for (const typeCheck of document.querySelectorAll('.media--information > ul > li')) {

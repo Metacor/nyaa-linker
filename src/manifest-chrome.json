@@ -1,6 +1,6 @@
 {
     "name": "Nyaa Linker",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "description": "Adds a button to Anime and Manga database websites that opens a relevant Nyaa search",
     "manifest_version": 3,
 
@@ -10,7 +10,7 @@
             "matches": [
                 "*://*.myanimelist.net/*",
                 "*://*.anilist.co/*",
-                "*://*.kitsu.io/*",
+                "*://*.kitsu.app/*",
                 "*://*.anime-planet.com/*",
                 "*://*.animenewsnetwork.com/encyclopedia/*",
                 "*://*.anidb.net/*",

@@ -23,6 +23,7 @@ function searchNyaa(settings) {
     const media = window.location.pathname.includes('manga') ? 'manga' : 'anime';
     let titleJap, titleEng, btnSpace, cardType, cardFlag;
     let queryType = settings.query_setting;
+    let customQuery = settings.custom_text_toggle_setting ? settings.custom_text_setting : '';
 
     if (media === 'manga') {
         const searchManga = (cat) => {
@@ -43,7 +44,7 @@ function searchNyaa(settings) {
     function createSearch(query) {
         !btn.title && (btn.textContent = 'Search on Nyaa');
         (query.includes('&') || query.includes('+')) && (query = query.replace(/&/g, '%26').replace(/\+/g, '%2B'));
-        btn.href = `https://nyaa.si/?f=${settings.filter_setting}&c=${settings.category_setting}&q=${query}&s=${settings.sort_setting}&o=${settings.order_setting}`;
+        btn.href = `https://nyaa.si/?f=${settings.filter_setting}&c=${settings.category_setting}&q=${query}${customQuery}&s=${settings.sort_setting}&o=${settings.order_setting}`;
         btn.target = '_blank';
     }
 
@@ -248,6 +249,8 @@ function searchNyaa(settings) {
 
 function getQuery(titleJap, titleEng, queryType) {
     !titleJap && !titleEng && init();
+    titleJap && (titleJap = titleJap.replace(/["]/g, ''));
+    titleEng && (titleEng = titleEng.replace(/["]/g, ''));
     query = `"${titleJap}"|"${titleEng}"`;
 
     if (!titleEng || titleJap.toLowerCase() === titleEng.toLowerCase()) {
@@ -276,6 +279,12 @@ function getBaseTitle(baseTitle) {
     const hasWord = /(?<![\w])(first|second|third|fourth|fifth|(the final|final))(?![\w])/i;
     const hasPart = /(?<![\w])(part )/i;
     const hasEndPunc = /[?!.]$/;
+
+    baseTitle = baseTitle
+        .replace(/[\(\)\[\]\{\}][^()\[\]\{\}]*[\)\]\{\}]/g, '')
+        .replace(/([♡♥☆★♪∞])(?=\w)/g, ' ')
+        .replace(/[♡♥☆★♪∞](?!\w)/g, '')
+        .trim();
 
     baseTitle.includes(': ') && (baseTitle = baseTitle.split(': ').shift());
     baseTitle.includes(' - ') && (baseTitle = baseTitle.split(' - ').pop());

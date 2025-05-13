@@ -15,16 +15,17 @@
 }
 
 body {
+    font-family: sans-serif;
     background: var(--clrDark);
     color: var(--clrLight);
-    width: max-content;
-    font-family: sans-serif;
+    width: min-content;
+    overflow: hidden;
 }
 
 #parametersPage,
 #settingsPage {
     display: grid;
-    grid-template-columns: max-content max-content;
+    grid-template-columns: auto auto;
     gap: 2px;
     padding: 2px 0 2px 2px;
     text-align: right;
@@ -48,7 +49,8 @@ option {
 
 select,
 #saveButton,
-#hotkey_key_select {
+#hotkey_key_select,
+#custom_text_select {
     background: var(--clrAccent);
     color: var(--clrDark);
 }
@@ -80,6 +82,7 @@ input[type='checkbox'] {
 }
 
 #hotkey_modifier_select,
-#hotkey_query_select {
-    width: 150%;
+#hotkey_query_select,
+#custom_text_select {
+    width: 98%;
 }

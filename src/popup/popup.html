@@ -63,6 +63,12 @@
                 <label for="focus_select">Maintain Focus:</label>
                 <input type="checkbox" id="focus_select" title="Changes Tab Focus behavior when using the Hotkey">
                 
+                <label for="custom_text_toggle_select">Include Text:</label>
+                <input type="checkbox" id="custom_text_toggle_select" title="Decides if text in 'Custom Query' is included">
+                
+                <label for="custom_text_select">Custom Text:</label>
+                <input type="text" placeholder="?" id="custom_text_select" title="User defined text to be added at the end of the search query">
+                
                 <label for="hotkey_key_select">Hotkey:</label>
                 <input type="text" maxlength="1" placeholder="?" id="hotkey_key_select">
                 
@@ -81,8 +87,7 @@
                     <option value="fuzzy" title="Searches for the site's default title only, without quotes — allows fuzzy matching">Fuzzy</option>
                     <option value="exact" title="Japanese and English full titles — searches for exact title names as written">Exact</option>
                     <option value="base" title="Japanese and English base titles — searches with Seasons and Parts removed">Base</option>
-                </select>
-
+                </select>              
         </div>
 </html>
 

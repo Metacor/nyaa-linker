@@ -19,6 +19,8 @@ const defaultSettings = () => {
             order_setting: 'desc',
             hide_button_setting: false,
             focus_setting: false,
+            custom_text_toggle_setting: false,
+            custom_text_setting: '',
             hotkey_key_setting: '',
             hotkey_modifier_setting: '',
             hotkey_query_setting: 'inherit',

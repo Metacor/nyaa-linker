@@ -8,6 +8,8 @@ window.onload = () => {
             document.getElementById('order_select').value = load.settings.order_setting;
             document.getElementById('hide_button_select').checked = load.settings.hide_button_setting;
             document.getElementById('focus_select').checked = load.settings.focus_setting;
+            document.getElementById('custom_text_toggle_select').checked = load.settings.custom_text_toggle_setting;
+            document.getElementById('custom_text_select').value = load.settings.custom_text_setting;
             document.getElementById('hotkey_key_select').value = load.settings.hotkey_key_setting;
             document.getElementById('hotkey_modifier_select').value = load.settings.hotkey_modifier_setting;
             document.getElementById('hotkey_query_select').value = load.settings.hotkey_query_setting;
@@ -24,6 +26,8 @@ const saveSettings = () => {
     settings['order_setting'] = document.getElementById('order_select').value;
     settings['hide_button_setting'] = document.getElementById('hide_button_select').checked;
     settings['focus_setting'] = document.getElementById('focus_select').checked;
+    settings['custom_text_toggle_setting'] = document.getElementById('custom_text_toggle_select').checked;
+    settings['custom_text_setting'] = document.getElementById('custom_text_select').value;
     settings['hotkey_key_setting'] = document.getElementById('hotkey_key_select').value.toLowerCase();
     settings['hotkey_modifier_setting'] = document.getElementById('hotkey_modifier_select').value;
     settings['hotkey_query_setting'] = document.getElementById('hotkey_query_select').value;

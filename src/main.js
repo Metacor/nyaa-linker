@@ -21,17 +21,21 @@ async function init() {
 function searchNyaa(settings) {
     const domain = window.location.href;
     const media = window.location.pathname.includes('manga') ? 'manga' : 'anime';
-    let titleJap, titleEng, btnSpace, cardType, cardFlag;
+    let titleJap, titleEng, btnSpace, cardType, cardFlag, isSpicy;
+    let categorySetting = settings.category_setting;
     let queryType = settings.query_setting;
     let customQuery = settings.custom_text_toggle_setting ? settings.custom_text_setting : '';
 
-    if (media === 'manga') {
-        const searchManga = (cat) => {
+    const setCategory = (cat) => {
+        if (media === 'manga') {
             const categories = { '0_0': '3_0', '1_2': '3_1', '1_3': '3_2', '1_4': '3_3' };
             return categories[cat];
-        };
-        settings.category_setting = searchManga(settings.category_setting);
-    }
+        } else {
+            return cat;
+        }
+    };
+
+    categorySetting = setCategory(settings.category_setting);
 
     function createBtn(btnSpace) {
         !cardFlag && document.querySelector('.nyaaBtn') && document.querySelectorAll('.nyaaBtn').forEach((e) => e.remove()), (cardFlag = true);
@@ -42,9 +46,14 @@ function searchNyaa(settings) {
     }
 
     function createSearch(query) {
-        !btn.title && (btn.textContent = 'Search on Nyaa');
+        let subDomain, siteText;
+        isSpicy
+            ? ((subDomain = 'Sukebei.'), (siteText = 'Sukebei'), media === 'manga' ? (categorySetting = '0_0') : (categorySetting = '1_1'))
+            : ((subDomain = ''), (siteText = 'Nyaa'));
+
+        !btn.title && (btn.textContent = `Search on ${siteText}`);
         (query.includes('&') || query.includes('+')) && (query = query.replace(/&/g, '%26').replace(/\+/g, '%2B'));
-        btn.href = `https://nyaa.si/?f=${settings.filter_setting}&c=${settings.category_setting}&q=${query}${customQuery}&s=${settings.sort_setting}&o=${settings.order_setting}`;
+        btn.href = `https://${subDomain}nyaa.si/?f=${settings.filter_setting}&c=${categorySetting}&q=${query}${customQuery}&s=${settings.sort_setting}&o=${settings.order_setting}`;
         btn.target = '_blank';
     }
 
@@ -79,31 +88,39 @@ function searchNyaa(settings) {
                     const titleElm = document.querySelector('[itemprop="name"]');
                     titleJap = titleElm.textContent;
                     if (engCheck) {
-                        (engCheck.textContent = ''), (titleJap = titleElm.textContent), (engCheck.textContent = titleEng);
+                        engCheck.textContent = '';
+                        titleJap = titleElm.textContent;
+                        engCheck.textContent = titleEng;
                     }
                 } else {
                     titleJap = document.querySelector('.title-name').textContent;
                 }
 
-                document.getElementById('broadcast-block')
-                    ? (btnSpace = document.getElementById('broadcast-block'))
-                    : (btnSpace = document.querySelector('.leftside').children[0]);
+                isSpicy = [...document.querySelectorAll('span[itemprop="genre"]')].some((el) => el.textContent.trim().toLowerCase() === 'hentai');
+
+                btnSpace = document.getElementById('broadcast-block') || document.querySelector('.leftside').children[0];
                 createBtn(btnSpace);
                 btn.style.marginTop = '4px';
                 btn.classList.add('left-info-block-broadcast-button');
                 createSearch(getQuery(titleJap, titleEng, queryType));
             }
 
-            if (domain.includes(`/genre`) || domain.includes(`/season`) || domain.includes('/magazine')) {
+            const cardPaths = ['/genre', '/season', '/magazine', '/adapted'];
+            if (cardPaths.some((path) => domain.includes(path))) {
+                if (domain.includes('/adapted') && document.querySelector('.list.on')) return;
+
                 for (const card of document.querySelectorAll('.seasonal-anime')) {
                     cardType = true;
                     titleJap = card.querySelector('.title h2').innerText;
-                    card.querySelector('.title h3') ? (titleEng = card.querySelector('.title h3').innerText) : (titleEng = undefined);
+                    titleEng = card.querySelector('.title h3')?.innerText;
+                    isSpicy = [...card.querySelectorAll('.explicit a')].some((el) => el.title.toLowerCase().includes('hentai'));
+                    !isSpicy && (categorySetting = setCategory(settings.category_setting));
 
                     createBtn(card.querySelector('.broadcast'));
                     btn.title = 'Search on Nyaa';
                     btn.style.background = 'url(https://i.imgur.com/9Fr2BRG.png) center/20px no-repeat';
                     btn.style.padding = '0 11px';
+                    isSpicy && ((btn.title = 'Search on Sukebei'), (btn.style.border = '2px solid red'), (btn.style.borderRadius = '50%'));
                     createSearch(getQuery(titleJap, titleEng, queryType));
                 }
             }
@@ -163,13 +180,15 @@ function searchNyaa(settings) {
                 titleJap = document.querySelector(".value > [itemprop='name']").textContent;
                 titleEng = document.querySelector(".value > [itemprop='alternateName']").textContent;
 
+                isSpicy = [...document.querySelectorAll('.tagname')].some((el) => el.textContent.trim().toLowerCase() === '18 restricted');
+
                 btnSpace = document.querySelector('.resources > .value .english').appendChild(document.createElement('div'));
                 btnSpace.classList.add('icons');
                 createBtn(btnSpace);
                 btn.classList.add('i_icon');
                 btn.style.backgroundImage = "url('https://i.imgur.com/YG6H2nF.png')";
                 btn.style.backgroundSize = 'contain';
-                btn.title = 'Search on Nyaa';
+                isSpicy ? (btn.title = 'Search on Sukebei') : (btn.title = 'Search on Nyaa');
                 createSearch(getQuery(titleJap, titleEng, queryType));
             }
             break;
@@ -180,6 +199,7 @@ function searchNyaa(settings) {
                     const setTitle = data.parentNode.children[1].textContent;
                     data.textContent.includes('Romaji') && (titleJap = setTitle);
                     data.textContent.includes('English') && (titleEng = setTitle);
+                    data.textContent.includes('Genres') ? (isSpicy = setTitle.toLowerCase().includes('hentai')) : null;
                 }
 
                 createBtn(document.querySelector('.cover-wrap-inner'));
@@ -196,15 +216,21 @@ function searchNyaa(settings) {
             break;
 
         case domain.includes(`kitsu.app/${media}/`):
-            awaitLoadOf('.media--information', 'Japanese (Romaji)', () => {
+            awaitLoadOf('.media--information', 'Status', () => {
                 let titleUsa;
-                for (const typeCheck of document.querySelectorAll('.media--information > ul > li')) {
-                    const usaCheck = typeCheck.textContent.includes('English (American)');
-                    const setTitle = typeCheck.getElementsByTagName('span')[0];
-                    typeCheck.textContent.includes('Japanese (Romaji)') && (titleJap = setTitle.textContent);
-                    typeCheck.textContent.includes('English') && !usaCheck && (titleEng = setTitle.textContent);
+                document.querySelector('a.more-link')?.click();
+                for (const data of document.querySelectorAll('.media--information > ul > li')) {
+                    const usaCheck = data.textContent.includes('English (American)');
+                    const setTitle = data.getElementsByTagName('span')[0];
+                    data.textContent.includes('Japanese (Romaji)') && (titleJap = setTitle.textContent);
+                    data.textContent.includes('English') && !usaCheck && (titleEng = setTitle.textContent);
                     usaCheck && (titleUsa = setTitle.textContent);
+                    if (data.textContent.includes('Rating')) {
+                        isSpicy = data.querySelector('span')?.textContent.replace(/\s+/g, ' ').trim() === 'R18 - Hentai';
+                    }
                 }
+                document.querySelector('a.more-link')?.click();
+
                 !titleEng && titleUsa && (titleEng = titleUsa);
                 !titleJap && titleEng && (titleJap = titleEng);
 

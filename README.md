@@ -22,15 +22,18 @@
 -   "Default" search example: clicking the button on [Shingeki no Kyojin Season 3 Part 2](https://myanimelist.net/anime/38524/Shingeki_no_Kyojin_Season_3_Part_2) will search Nyaa for:
     -   _"Shingeki no Kyojin Season 3 Part 2"|"Attack on Titan Season 3 Part 2"|"Shingeki no Kyojin"|"Attack on Titan"_
 
-# Firefox - [Extension Page](https://addons.mozilla.org/en-US/firefox/addon/nyaa-linker/)
+# Firefox - [Add-ons](https://addons.mozilla.org/en-US/firefox/addon/nyaa-linker/)
 
-# Chrome - ~~Extension Page~~
+# Chrome - ~~Web Store~~
 
 > I don't have a Chrome Developer Account, Chrome Users will need to manually install the Extension
 
 -   Download Chrome.zip from the [Latest Release](https://github.com/Metacor/nyaa-linker/releases)
 -   [Enable "Developer mode" in Chrome](https://i.imgur.com/h7kvj1h.png)
 -   [Drag and Drop](https://i.imgur.com/u9LzP57.png) "nyaa-linker.zip" onto the "chrome://extensions" page
+
+# Userscript - [GitHub](https://github.com/po5/nyaa-linker-userscript)
+> If you would prefer a userscript version, [Eva (po5)](https://github.com/po5) created one that maintains feature parity.
 
 ## If the Extension only activates after you click the Popup:
 
@@ -45,3 +48,4 @@
 -   Optionally: Right-click the Extension icon and enable for each site: [Firefox](https://i.imgur.com/XHziPTB.png) | [Chrome](https://i.imgur.com/RjMCZSK.png)
 
 ### If you wish to submit a Pull Request, please read the [Contributing Guide](https://github.com/Metacor/nyaa-linker/blob/main/.github/CONTRIBUTING.md)
+

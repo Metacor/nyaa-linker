@@ -1,7 +1,7 @@
 let btn, currentPage, previousPage, hotkeyListener;
 chrome.runtime.onMessage.addListener((request) => {
     if (request.type === 'tabUpdated') {
-        currentPage = window.location.href.split('/')[4];
+        currentPage = window.location.href.includes('/search?') ? window.location.href : window.location.href.split('/')[4];
         (!btn || currentPage !== previousPage) && init();
     }
 });
@@ -18,9 +18,9 @@ async function init() {
     searchNyaa(settings);
 }
 
-function searchNyaa(settings) {
+async function searchNyaa(settings) {
     const domain = window.location.href;
-    const media = window.location.pathname.includes('manga') ? 'manga' : 'anime';
+    let media = window.location.pathname.includes('/manga/') ? 'manga' : 'anime';
     let titleJap, titleEng, btnSpace, cardType, cardFlag, isSpicy;
     let categorySetting = settings.category_setting;
     let queryType = settings.query_setting;
@@ -120,7 +120,7 @@ function searchNyaa(settings) {
                     btn.title = 'Search on Nyaa';
                     btn.style.background = 'url(https://i.imgur.com/9Fr2BRG.png) center/20px no-repeat';
                     btn.style.padding = '0 11px';
-                    isSpicy && ((btn.title = 'Search on Sukebei'), (btn.style.border = '2px solid red'), (btn.style.borderRadius = '50%'));
+                    isSpicy && ((btn.title = 'Search on Sukebei'), (btn.style.border = '2px solid #ff80b0'), (btn.style.borderRadius = '50%'));
                     createSearch(getQuery(titleJap, titleEng, queryType));
                 }
             }
@@ -175,8 +175,7 @@ function searchNyaa(settings) {
             break;
 
         case domain.includes(`anidb.net/${media}/`):
-            const hasID = /anidb\.net\/\w+\/(\d+)/;
-            if (domain.match(hasID)) {
+            if (domain.match(/anidb\.net\/\w+\/(\d+)/)) {
                 titleJap = document.querySelector(".value > [itemprop='name']").textContent;
                 titleEng = document.querySelector(".value > [itemprop='alternateName']").textContent;
 
@@ -194,66 +193,70 @@ function searchNyaa(settings) {
             break;
 
         case domain.includes(`anilist.co/${media}/`):
-            awaitLoadOf('.sidebar .type', 'Romaji', () => {
-                for (const data of document.getElementsByClassName('type')) {
-                    const setTitle = data.parentNode.children[1].textContent;
-                    data.textContent.includes('Romaji') && (titleJap = setTitle);
-                    data.textContent.includes('English') && (titleEng = setTitle);
-                    data.textContent.includes('Genres') ? (isSpicy = setTitle.toLowerCase().includes('hentai')) : null;
-                }
+            await awaitLoadOf('.sidebar .type', 'text', 'Romaji');
+            for (const data of document.getElementsByClassName('type')) {
+                const setTitle = data.parentNode.children[1].textContent;
+                data.textContent.includes('Romaji') && (titleJap = setTitle);
+                data.textContent.includes('English') && (titleEng = setTitle);
+                data.textContent.includes('Genres') ? (isSpicy = setTitle.toLowerCase().includes('hentai')) : null;
+            }
 
-                createBtn(document.querySelector('.cover-wrap-inner'));
-                btn.style.display !== 'none' && (btn.style.display = 'flex');
-                btn.style.alignItems = 'center';
-                btn.style.justifyContent = 'center';
-                btn.style.height = '35px';
-                btn.style.borderRadius = '3px';
-                btn.style.marginBottom = '20px';
-                btn.style.background = 'rgb(var(--color-blue))';
-                btn.style.color = 'rgb(var(--color-white))';
-                createSearch(getQuery(titleJap, titleEng, queryType));
-            });
+            createBtn(document.querySelector('.cover-wrap-inner'));
+            btn.style.display !== 'none' && (btn.style.display = 'flex');
+            btn.style.alignItems = 'center';
+            btn.style.justifyContent = 'center';
+            btn.style.height = '35px';
+            btn.style.borderRadius = '3px';
+            btn.style.marginBottom = '20px';
+            btn.style.background = 'rgb(var(--color-blue))';
+            btn.style.color = 'rgb(var(--color-white))';
+            createSearch(getQuery(titleJap, titleEng, queryType));
             break;
 
         case domain.includes(`kitsu.app/${media}/`):
-            awaitLoadOf('.media--information', 'Status', () => {
-                let titleUsa;
-                document.querySelector('a.more-link')?.click();
-                for (const data of document.querySelectorAll('.media--information > ul > li')) {
-                    const usaCheck = data.textContent.includes('English (American)');
-                    const setTitle = data.getElementsByTagName('span')[0];
-                    data.textContent.includes('Japanese (Romaji)') && (titleJap = setTitle.textContent);
-                    data.textContent.includes('English') && !usaCheck && (titleEng = setTitle.textContent);
-                    usaCheck && (titleUsa = setTitle.textContent);
-                    if (data.textContent.includes('Rating')) {
-                        isSpicy = data.querySelector('span')?.textContent.replace(/\s+/g, ' ').trim() === 'R18 - Hentai';
-                    }
+            await awaitLoadOf('.media--information', 'text', 'Status');
+            let titleUsa;
+            document.querySelector('a.more-link')?.click();
+            for (const data of document.querySelectorAll('.media--information > ul > li')) {
+                const usaCheck = data.textContent.includes('English (American)');
+                const setTitle = data.getElementsByTagName('span')[0];
+                data.textContent.includes('Japanese (Romaji)') && (titleJap = setTitle.textContent);
+                data.textContent.includes('English') && !usaCheck && (titleEng = setTitle.textContent);
+                usaCheck && (titleUsa = setTitle.textContent);
+                if (data.textContent.includes('Rating')) {
+                    isSpicy = data.querySelector('span')?.textContent.replace(/\s+/g, ' ').trim() === 'R18 - Hentai';
                 }
-                document.querySelector('a.more-link')?.click();
+            }
+            document.querySelector('a.more-link')?.click();
 
-                !titleEng && titleUsa && (titleEng = titleUsa);
-                !titleJap && titleEng && (titleJap = titleEng);
+            !titleEng && titleUsa && (titleEng = titleUsa);
+            !titleJap && titleEng && (titleJap = titleEng);
 
-                createBtn(document.querySelector('.library-state'));
-                btn.classList.add('button', 'button--secondary');
-                btn.style.background = '#f5725f';
-                btn.style.marginTop = '10px';
-                createSearch(getQuery(titleJap, titleEng, queryType));
-            });
+            createBtn(document.querySelector('.library-state'));
+            btn.classList.add('button', 'button--secondary');
+            btn.style.background = '#f5725f';
+            btn.style.marginTop = '10px';
+            createSearch(getQuery(titleJap, titleEng, queryType));
             break;
 
         case domain.includes('livechart.me'):
             if (domain.includes(`livechart.me/${media}/`)) {
-                titleJap = document.querySelector('.grow .text-xl').innerText;
-                titleEng = document.querySelector('.grow .text-lg').innerText;
+                const animeDetails = document.querySelector('[data-controller="anime-details"]');
+                titleJap = animeDetails.getAttribute('data-anime-details-romaji-title');
+                titleEng = animeDetails.getAttribute('data-anime-details-english-title') || undefined;
 
                 createBtn(document.querySelector('.lc-poster-col'));
                 btn.classList.add('lc-btn', 'lc-btn-sm', 'lc-btn-outline');
                 createSearch(getQuery(titleJap, titleEng, queryType));
             } else {
                 let cardSelector, cardSpace;
-                domain.includes('livechart.me/franchises/') ? (cardSelector = '.lc-anime') : (cardSelector = '.anime');
-                domain.includes('livechart.me/franchises/') ? (cardSpace = '.lc-anime-card--related-links') : (cardSpace = '.related-links');
+                if (domain.includes('/franchises/') || domain.includes('/studios/') || domain.includes('/tags/')) {
+                    cardSelector = '.lc-anime';
+                    cardSpace = '.lc-anime-card--related-links';
+                } else {
+                    cardSelector = '.anime';
+                    cardSpace = '.related-links';
+                }
 
                 for (const card of document.querySelectorAll(cardSelector)) {
                     cardType = true;
@@ -268,6 +271,68 @@ function searchNyaa(settings) {
                     btn.title = 'Search on Nyaa';
                     createSearch(getQuery(titleJap, titleEng, queryType));
                 }
+            }
+            break;
+
+        case domain.includes('mangabaka.'):
+            const mainContentWrapper = await awaitLoadOf('.content-wrapper', 'container');
+
+            media = 'manga';
+            categorySetting = setCategory(categorySetting);
+
+            const handleCard = (cardElm, mainTitleSelector, altTitleSelector) => {
+                const mainTitle = cardElm.querySelector(mainTitleSelector)?.innerText || '';
+                const altTitles = altTitleSelector ? [...cardElm.querySelectorAll(altTitleSelector)].map((elm) => elm.innerText).filter(Boolean) : [];
+
+                const ratingContainer =
+                    cardElm.querySelector('.ratings-list') || cardElm.querySelector('.flex.flex-wrap.items-center.gap-2 > .flex.flex-wrap.gap-2');
+                createBtn(ratingContainer);
+                btn.title = 'Search on Nyaa';
+                btn.className = 'bg-secondary hover:bg-secondary/80 inline-flex items-center justify-center rounded-md h-10 px-5 nyaaBtn';
+
+                const btnImg = btn.appendChild(document.createElement('img'));
+                btnImg.className = 'size-5 min-w-5';
+                btnImg.src = 'https://i.imgur.com/9Fr2BRG.png';
+
+                createSearch(getQuery(mainTitle, altTitles[0], queryType));
+            };
+
+            if (/\/\d+(\/|$)/.test(window.location.href)) {
+                if (window.location.search.includes('tab=related')) {
+                    const relatedCardsContainer = await awaitLoadOf('.grid-container', 'container', mainContentWrapper);
+                    const allRelatedCards = Array.from(await awaitLoadOf('.bg-card', 'count', relatedCardsContainer));
+                    allRelatedCards.forEach((card) => handleCard(card, 'a.line-clamp-2', 'span.line-clamp-2'));
+                } else {
+                    handleCard(document, 'h1', 'h2');
+                }
+            } else if (window.location.pathname === '/') {
+                const recentlyViewedHeader = await awaitLoadOf('h5', 'text', 'Recently viewed series', mainContentWrapper);
+                const recentlyViewedContainer = recentlyViewedHeader.nextElementSibling;
+                const recentlyViewedCards = Array.from(await awaitLoadOf('.bg-card', 'count', recentlyViewedContainer));
+                recentlyViewedCards.forEach((card) => {
+                    handleCard(card, 'a.line-clamp-1');
+                    btn.classList.replace('h-10', 'h-8');
+                });
+            } else if (window.location.href.includes('/library') || /\/u\/[^\/]+$/.test(window.location.href)) {
+                const libraryDiv = await awaitLoadOf('div.order-1', 'text', '(', mainContentWrapper);
+
+                let countMatch;
+                const startTime = Date.now();
+                while (!(countMatch = libraryDiv.textContent.match(/\((\d+)\)/)) || parseInt(countMatch[1]) === 0) {
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                    if (Date.now() - startTime > 5000) break;
+                }
+
+                const gridContainer = await awaitLoadOf('div.grid.gap-4', 'container', mainContentWrapper);
+                const libraryCards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
+                libraryCards.forEach((card) => {
+                    handleCard(card, 'a.line-clamp-2');
+                    btn.style.width = '66px';
+                });
+            } else if (window.location.href.includes('/search?')) {
+                const gridContainer = mainContentWrapper.querySelector('div.grid.gap-4');
+                const searchCards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
+                searchCards.forEach((card) => handleCard(card, 'a.line-clamp-2'));
             }
             break;
     }
@@ -335,18 +400,35 @@ function getBaseTitle(baseTitle) {
     return baseTitle;
 }
 
-const awaitLoadOf = (selector, text, func) => {
-    return new Promise((resolve) => {
+const awaitLoadOf = (selector, loadType, input) =>
+    new Promise((resolve) => {
+        const matchSelector = () => {
+            const root = input instanceof Element ? input : document;
+
+            if (loadType === 'text') {
+                const elms = document.querySelectorAll(selector);
+                for (const elm of elms) if (elm.textContent.includes(input)) return elm;
+            } else if (loadType === 'count') {
+                if (!root) return null;
+                const elms = root.querySelectorAll(selector);
+                if (elms.length >= (root.childElementCount || 1)) return Array.from(elms);
+            } else if (loadType === 'container') {
+                const elm = document.querySelector(selector);
+                if (elm) return elm;
+            }
+            return null;
+        };
+
+        const initialMatch = matchSelector();
+        if (initialMatch) return resolve(initialMatch);
+
         const mutObs = new MutationObserver(() => {
-            const elms = document.querySelectorAll(selector);
-            elms.forEach((elm) => {
-                if (elm.textContent.includes(text)) {
-                    resolve(elm);
-                    mutObs.disconnect();
-                    func();
-                }
-            });
+            const elm = matchSelector();
+            if (elm) {
+                mutObs.disconnect();
+                resolve(elm);
+            }
         });
+
         mutObs.observe(document.body, { childList: true, subtree: true });
     });
-};

@@ -1,19 +1,14 @@
-let btn, currentPage, previousPage, hotkeyListener;
-chrome.runtime.onMessage.addListener((request) => {
-    if (request.type === 'tabUpdated') {
-        currentPage = window.location.href.includes('/search?') ? window.location.href : window.location.href.split('/')[4];
-        (!btn || currentPage !== previousPage) && init();
-    }
-});
+let hotkeyListener;
+chrome.runtime.onMessage.addListener((request) => request.type === 'tabUpdated' && init());
 
 async function init() {
+    if (!chrome.runtime?.id) return;
     const loadUserSettings = await new Promise((resolve) => {
         chrome.storage.sync.get('settings', (res) => {
             resolve(res);
         });
     });
 
-    previousPage = currentPage;
     const settings = loadUserSettings.settings;
     searchNyaa(settings);
 }
@@ -21,9 +16,10 @@ async function init() {
 async function searchNyaa(settings) {
     const domain = window.location.href;
     let media = window.location.pathname.includes('/manga/') ? 'manga' : 'anime';
-    let titleJap, titleEng, btnSpace, cardType, cardFlag, isSpicy;
+    let titleJap, titleEng, btnSpace, btn, cardType, cardFlag, isSpicy;
     let categorySetting = settings.category_setting;
     let queryType = settings.query_setting;
+    let hotkeyQueryType = settings.hotkey_query_setting;
     let customQuery = settings.custom_text_toggle_setting ? settings.custom_text_setting : '';
 
     const setCategory = (cat) => {
@@ -42,7 +38,6 @@ async function searchNyaa(settings) {
         btn = btnSpace.appendChild(document.createElement('a'));
         btn.classList.add('nyaaBtn');
         settings.hide_button_setting && (btn.style.display = 'none');
-        !cardType && settings.hotkey_key_setting && startHotkeyListener();
     }
 
     function createSearch(query) {
@@ -52,30 +47,29 @@ async function searchNyaa(settings) {
             : ((subDomain = ''), (siteText = 'Nyaa'));
 
         !btn.title && (btn.textContent = `Search on ${siteText}`);
-        (query.includes('&') || query.includes('+')) && (query = query.replace(/&/g, '%26').replace(/\+/g, '%2B'));
+        query && (query.includes('&') || query.includes('+')) && (query = query.replace(/&/g, '%26').replace(/\+/g, '%2B'));
         btn.href = `https://${subDomain}nyaa.si/?f=${settings.filter_setting}&c=${categorySetting}&q=${query}${customQuery}&s=${settings.sort_setting}&o=${settings.order_setting}`;
         btn.target = '_blank';
     }
 
-    function startHotkeyListener() {
-        hotkeyListener && document.removeEventListener('keydown', hotkeyListener);
-        hotkeyListener = (e) => {
-            if (
-                (btn && e[settings.hotkey_modifier_setting] && e.key.toLowerCase() === settings.hotkey_key_setting) ||
-                (btn && settings.hotkey_modifier_setting === '' && !e.ctrlKey && !e.shiftKey && !e.altKey && e.key === settings.hotkey_key_setting)
-            ) {
-                if (settings.hotkey_query_setting !== 'inherit') {
-                    queryType = settings.hotkey_query_setting;
-                    createSearch(getQuery(titleJap, titleEng, queryType));
-                }
-                btn.dispatchEvent(new MouseEvent('click', { ctrlKey: settings.focus_setting }));
-                e.preventDefault();
-                queryType = settings.query_setting;
-                createSearch(getQuery(titleJap, titleEng, queryType));
-            }
-        };
-        document.addEventListener('keydown', hotkeyListener);
+    if (hotkeyListener) {
+        document.removeEventListener('keydown', hotkeyListener);
     }
+
+    hotkeyListener = (e) => {
+        if (cardType || !btn) return;
+
+        const validModifier = settings.hotkey_modifier_setting ? e[settings.hotkey_modifier_setting] : !e.ctrlKey && !e.shiftKey && !e.altKey;
+
+        if (validModifier && e.key.toLowerCase() === settings.hotkey_key_setting) {
+            settings.hotkey_query_setting !== 'inherit' && createSearch(getQuery(titleJap, titleEng, hotkeyQueryType));
+            e.preventDefault();
+            btn.dispatchEvent(new MouseEvent('click', { ctrlKey: settings.focus_setting }));
+            createSearch(getQuery(titleJap, titleEng, queryType));
+        }
+    };
+
+    document.addEventListener('keydown', hotkeyListener);
 
     switch (true) {
         case domain.includes(`myanimelist.net`):
@@ -175,7 +169,7 @@ async function searchNyaa(settings) {
             break;
 
         case domain.includes(`anidb.net/${media}/`):
-            if (domain.match(/anidb\.net\/\w+\/(\d+)/)) {
+            if (/\/\d+(\/|$)/.test(window.location.pathname)) {
                 titleJap = document.querySelector(".value > [itemprop='name']").textContent;
                 titleEng = document.querySelector(".value > [itemprop='alternateName']").textContent;
 
@@ -242,8 +236,12 @@ async function searchNyaa(settings) {
         case domain.includes('livechart.me'):
             if (domain.includes(`livechart.me/${media}/`)) {
                 const animeDetails = document.querySelector('[data-controller="anime-details"]');
-                titleJap = animeDetails.getAttribute('data-anime-details-romaji-title');
-                titleEng = animeDetails.getAttribute('data-anime-details-english-title') || undefined;
+                if (animeDetails) {
+                    titleJap = animeDetails.getAttribute('data-anime-details-romaji-title') || undefined;
+                    titleEng = animeDetails.getAttribute('data-anime-details-english-title') || undefined;
+                } else {
+                    break;
+                }
 
                 createBtn(document.querySelector('.lc-poster-col'));
                 btn.classList.add('lc-btn', 'lc-btn-sm', 'lc-btn-outline');
@@ -274,65 +272,97 @@ async function searchNyaa(settings) {
             }
             break;
 
-        case domain.includes('mangabaka.'):
+        case domain.includes('mangabaka.dev') || domain.includes('mangabaka.org'):
             const mainContentWrapper = await awaitLoadOf('.content-wrapper', 'container');
+            let directPage, gridContainer;
 
             media = 'manga';
             categorySetting = setCategory(categorySetting);
 
-            const handleCard = (cardElm, mainTitleSelector, altTitleSelector) => {
-                const mainTitle = cardElm.querySelector(mainTitleSelector)?.innerText || '';
-                const altTitles = altTitleSelector ? [...cardElm.querySelectorAll(altTitleSelector)].map((elm) => elm.innerText).filter(Boolean) : [];
+            const bakaHelper = (dbEntry, mainSelector, altSelector) => {
+                cardType = !directPage;
+
+                titleJap = dbEntry.querySelector(mainSelector)?.innerText || '';
+                const altTitles = altSelector ? [...dbEntry.querySelectorAll(altSelector)].map((e) => e.title).filter(Boolean) : [];
+                altTitles ? (titleEng = altTitles[0]) : null;
 
                 const ratingContainer =
-                    cardElm.querySelector('.ratings-list') || cardElm.querySelector('.flex.flex-wrap.items-center.gap-2 > .flex.flex-wrap.gap-2');
+                    dbEntry.querySelector('.ratings-list') || dbEntry.querySelector('.flex.flex-wrap.items-center.gap-2 > .flex.flex-wrap.gap-2');
+                if (!ratingContainer) return;
+
+                const tttCache = gridContainer?.querySelector('a[data-slot="tooltip-trigger"]');
+                const pxValue = tttCache?.classList.contains('px-3') ? { class: 'px-3', hClass: 'h-10' } : { class: 'px-2', hClass: 'h-8' };
+
                 createBtn(ratingContainer);
                 btn.title = 'Search on Nyaa';
-                btn.className = 'bg-secondary hover:bg-secondary/80 inline-flex items-center justify-center rounded-md h-10 px-5 nyaaBtn';
+                btn.className = 'bg-secondary hover:bg-secondary/80 inline-flex items-center justify-center rounded-md h-10 nyaaBtn';
+                if (tttCache) {
+                    btn.classList.remove('h-8', 'h-10');
+                    btn.classList.add(pxValue.hClass);
+                }
 
                 const btnImg = btn.appendChild(document.createElement('img'));
                 btnImg.className = 'size-5 min-w-5';
                 btnImg.src = 'https://i.imgur.com/9Fr2BRG.png';
 
-                createSearch(getQuery(mainTitle, altTitles[0], queryType));
+                createSearch(getQuery(titleJap, titleEng, queryType));
             };
 
-            if (/\/\d+(\/|$)/.test(window.location.href)) {
-                if (window.location.search.includes('tab=related')) {
-                    const relatedCardsContainer = await awaitLoadOf('.grid-container', 'container', mainContentWrapper);
-                    const allRelatedCards = Array.from(await awaitLoadOf('.bg-card', 'count', relatedCardsContainer));
-                    allRelatedCards.forEach((card) => handleCard(card, 'a.line-clamp-2', 'span.line-clamp-2'));
+            if (/\/\d+(\/|$)/.test(window.location.pathname)) {
+                if (/\/\d+\/related\/?$/.test(window.location.pathname)) {
+                    gridContainer = await awaitLoadOf('.grid-container', 'container', mainContentWrapper);
+                    const relatedCards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
+                    relatedCards.forEach((card) => bakaHelper(card, 'a.line-clamp-2', 'span.line-clamp-2'));
                 } else {
-                    handleCard(document, 'h1', 'h2');
+                    directPage = true;
+                    gridContainer = mainContentWrapper.querySelector('div.grid.gap-4');
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => bakaHelper(mainContentWrapper, 'h1', 'h2'));
+                    });
                 }
             } else if (window.location.pathname === '/') {
                 const recentlyViewedHeader = await awaitLoadOf('h5', 'text', 'Recently viewed series', mainContentWrapper);
-                const recentlyViewedContainer = recentlyViewedHeader.nextElementSibling;
-                const recentlyViewedCards = Array.from(await awaitLoadOf('.bg-card', 'count', recentlyViewedContainer));
+                gridContainer = recentlyViewedHeader.nextElementSibling;
+                const recentlyViewedCards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
                 recentlyViewedCards.forEach((card) => {
-                    handleCard(card, 'a.line-clamp-1');
+                    bakaHelper(card, 'a.line-clamp-1');
                     btn.classList.replace('h-10', 'h-8');
                 });
-            } else if (window.location.href.includes('/library') || /\/u\/[^\/]+$/.test(window.location.href)) {
-                const libraryDiv = await awaitLoadOf('div.order-1', 'text', '(', mainContentWrapper);
+            } else if (
+                window.location.href.includes('/library') ||
+                /\/u\/[^\/]+$/.test(window.location.href) ||
+                window.location.href.includes('/search?')
+            ) {
+                let modeType;
 
-                let countMatch;
-                const startTime = Date.now();
-                while (!(countMatch = libraryDiv.textContent.match(/\((\d+)\)/)) || parseInt(countMatch[1]) === 0) {
-                    await new Promise((resolve) => setTimeout(resolve, 100));
-                    if (Date.now() - startTime > 5000) break;
+                if (window.location.href.includes('/search?')) {
+                    if (mainContentWrapper.querySelector('div.grid-container')) {
+                        modeType = 'grid';
+                        gridContainer = mainContentWrapper.querySelector('div.grid-container');
+                    } else if (mainContentWrapper.querySelector('div.grid.gap-4')) {
+                        modeType = 'list';
+                        gridContainer = mainContentWrapper.querySelector('div.grid.gap-4');
+                    }
+                } else {
+                    const libraryDiv = await awaitLoadOf('div.order-1', 'text', '(', mainContentWrapper);
+
+                    let countMatch;
+                    const startTime = Date.now();
+                    while (!(countMatch = libraryDiv.textContent.match(/\((\d+)\)/)) || parseInt(countMatch[1]) === 0) {
+                        await new Promise((resolve) => setTimeout(resolve, 100));
+                        if (Date.now() - startTime > 5000) break;
+                    }
+
+                    gridContainer = await awaitLoadOf('div.grid.gap-4', 'container', mainContentWrapper);
+                    modeType = 'library';
                 }
 
-                const gridContainer = await awaitLoadOf('div.grid.gap-4', 'container', mainContentWrapper);
-                const libraryCards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
-                libraryCards.forEach((card) => {
-                    handleCard(card, 'a.line-clamp-2');
-                    btn.style.width = '66px';
+                const cards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
+                cards.forEach((card) => {
+                    const cardAltTitles = modeType === 'grid' ? 'span.line-clamp-2' : 'div.line-clamp-2';
+                    bakaHelper(card, 'a.line-clamp-2', cardAltTitles);
+                    modeType === 'library' && (btn.style.width = btn.classList.contains('h-8') ? '58px' : '66px');
                 });
-            } else if (window.location.href.includes('/search?')) {
-                const gridContainer = mainContentWrapper.querySelector('div.grid.gap-4');
-                const searchCards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
-                searchCards.forEach((card) => handleCard(card, 'a.line-clamp-2'));
             }
             break;
     }
@@ -342,7 +372,7 @@ function getQuery(titleJap, titleEng, queryType) {
     !titleJap && !titleEng && init();
     titleJap && (titleJap = titleJap.replace(/["]/g, ''));
     titleEng && (titleEng = titleEng.replace(/["]/g, ''));
-    query = `"${titleJap}"|"${titleEng}"`;
+    let query = `"${titleJap}"|"${titleEng}"`;
 
     if (!titleEng || titleJap.toLowerCase() === titleEng.toLowerCase()) {
         query = titleJap;
@@ -354,12 +384,13 @@ function getQuery(titleJap, titleEng, queryType) {
         if (queryType == 'default') {
             baseJap == titleJap && baseEng == titleEng ? (query = query) : (query = `"${titleJap}"|"${titleEng}"|"${baseJap}"|"${baseEng}"`);
         }
-
         if (queryType == 'base') {
             baseJap == baseEng ? (query = query) : (query = `"${baseJap}"|"${baseEng}"`);
         }
+        if (queryType == 'fuzzy') {
+            query = titleJap;
+        }
 
-        queryType == 'fuzzy' && (query = titleJap);
         return query;
     }
 }
@@ -414,7 +445,7 @@ const awaitLoadOf = (selector, loadType, input) =>
                 if (elms.length >= (root.childElementCount || 1)) return Array.from(elms);
             } else if (loadType === 'container') {
                 const elm = document.querySelector(selector);
-                if (elm) return elm;
+                if (elm && elm.childElementCount >= 1) return elm;
             }
             return null;
         };

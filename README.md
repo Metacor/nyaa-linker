@@ -3,8 +3,8 @@
 ## What the Extension Does
 
 -   Adds a "Search on Nyaa" Button to Anime and Manga database pages
-    -   Individual: **[MyAnimeList](https://i.imgur.com/IXJ7XuK.png), [AniList](https://i.imgur.com/9xhFu5q.jpeg), [Anime-Planet](https://i.imgur.com/sGsl0Bw.png), [AnimeNewsNetwork](https://i.imgur.com/xXvJXHC.png), [LiveChart](https://i.imgur.com/VyIWtLC.png), [AniDB](https://i.imgur.com/DqSkmOg.jpeg), [Kitsu](https://i.imgur.com/CN2kh4C.jpeg)**
-    -   Card-type: _**MyAnimeList** ([Season](https://i.imgur.com/7M4hr0z.png), [Genre](https://i.imgur.com/SklbImH.png)), **LiveChart** ([Season](https://i.imgur.com/wvLOp8N.jpeg), [Franchises](https://i.imgur.com/wcNv1JC.jpeg))_
+    -   Individual: **[MyAnimeList](https://i.imgur.com/IXJ7XuK.png), [AniList](https://i.imgur.com/9xhFu5q.jpeg), [Anime-Planet](https://i.imgur.com/sGsl0Bw.png), [AnimeNewsNetwork](https://i.imgur.com/xXvJXHC.png), [LiveChart](https://i.imgur.com/VyIWtLC.png), [AniDB](https://i.imgur.com/DqSkmOg.jpeg), [Kitsu](https://i.imgur.com/CN2kh4C.jpeg), [MangaBaka](https://i.imgur.com/D0lzgXE.png)**
+    -   Card-type: **[MyAnimeList](https://i.imgur.com/7M4hr0z.png), [LiveChart](https://i.imgur.com/wvLOp8N.jpeg), [MangaBaka](https://i.imgur.com/McqGNP6.png)**
 -   Extension settings can be customized and saved in the [Extension Popup window](https://i.imgur.com/a/cRBmW3T)
 
     -   The primary settings page is used to change Nyaa search parameters
@@ -33,6 +33,7 @@
 -   [Drag and Drop](https://i.imgur.com/u9LzP57.png) "nyaa-linker.zip" onto the "chrome://extensions" page
 
 # Userscript - [GitHub](https://github.com/po5/nyaa-linker-userscript)
+
 > If you would prefer a userscript version, [Eva (po5)](https://github.com/po5) created one that maintains feature parity.
 
 ## If the Extension only activates after you click the Popup:
@@ -48,4 +49,3 @@
 -   Optionally: Right-click the Extension icon and enable for each site: [Firefox](https://i.imgur.com/XHziPTB.png) | [Chrome](https://i.imgur.com/RjMCZSK.png)
 
 ### If you wish to submit a Pull Request, please read the [Contributing Guide](https://github.com/Metacor/nyaa-linker/blob/main/.github/CONTRIBUTING.md)
-

@@ -1,4 +1,5 @@
-let hotkeyListener;
+let hotkeyListener, cardType, mbElmLis, mbHandled, mbLastHref;
+/mangabaka\.(dev|org)/.test(location.href) && ((mbHandled = new Set()), (mbLastHref = location.href));
 chrome.runtime.onMessage.addListener((request) => request.type === 'tabUpdated' && init());
 
 async function init() {
@@ -16,7 +17,7 @@ async function init() {
 async function searchNyaa(settings) {
     const domain = window.location.href;
     let media = window.location.pathname.includes('/manga/') ? 'manga' : 'anime';
-    let titleJap, titleEng, btnSpace, btn, cardType, cardFlag, isSpicy;
+    let titleJap, titleEng, btnSpace, btn, cardFlag, isSpicy;
     let categorySetting = settings.category_setting;
     let queryType = settings.query_setting;
     let hotkeyQueryType = settings.hotkey_query_setting;
@@ -50,26 +51,24 @@ async function searchNyaa(settings) {
         query && (query.includes('&') || query.includes('+')) && (query = query.replace(/&/g, '%26').replace(/\+/g, '%2B'));
         btn.href = `https://${subDomain}nyaa.si/?f=${settings.filter_setting}&c=${categorySetting}&q=${query}${customQuery}&s=${settings.sort_setting}&o=${settings.order_setting}`;
         btn.target = '_blank';
+        startHotkeyListener();
     }
 
-    if (hotkeyListener) {
-        document.removeEventListener('keydown', hotkeyListener);
+    function startHotkeyListener() {
+        hotkeyListener && document.removeEventListener('keydown', hotkeyListener);
+        hotkeyListener = (e) => {
+            if (cardType || !btn) return;
+            const validModifier = settings.hotkey_modifier_setting ? e[settings.hotkey_modifier_setting] : !e.ctrlKey && !e.shiftKey && !e.altKey;
+
+            if (validModifier && e.key.toLowerCase() === settings.hotkey_key_setting) {
+                settings.hotkey_query_setting !== 'inherit' && createSearch(getQuery(titleJap, titleEng, hotkeyQueryType));
+                e.preventDefault();
+                btn.dispatchEvent(new MouseEvent('click', { ctrlKey: settings.focus_setting }));
+                createSearch(getQuery(titleJap, titleEng, queryType));
+            }
+        };
+        document.addEventListener('keydown', hotkeyListener);
     }
-
-    hotkeyListener = (e) => {
-        if (cardType || !btn) return;
-
-        const validModifier = settings.hotkey_modifier_setting ? e[settings.hotkey_modifier_setting] : !e.ctrlKey && !e.shiftKey && !e.altKey;
-
-        if (validModifier && e.key.toLowerCase() === settings.hotkey_key_setting) {
-            settings.hotkey_query_setting !== 'inherit' && createSearch(getQuery(titleJap, titleEng, hotkeyQueryType));
-            e.preventDefault();
-            btn.dispatchEvent(new MouseEvent('click', { ctrlKey: settings.focus_setting }));
-            createSearch(getQuery(titleJap, titleEng, queryType));
-        }
-    };
-
-    document.addEventListener('keydown', hotkeyListener);
 
     switch (true) {
         case domain.includes(`myanimelist.net`):
@@ -120,52 +119,56 @@ async function searchNyaa(settings) {
             }
             break;
 
-        case domain.includes(`anime-planet.com/${media}/`) && domain !== `https://www.anime-planet.com/${media}/`:
-            const skipPages = ['all', 'top-', 'recommendations', 'tags'];
-            let skipExtra =
-                media == 'anime' ? ['seasons', 'watch-online', 'studios'] : ['read-online', 'publishers', 'magazines', 'webtoons', 'light-novels'];
+        case domain.includes(`anime-planet.com/${media}/`) && !domain.endsWith(`/${media}/`):
+            const skipPages = {
+                generic: ['all', 'recommendations', 'tags'],
+                anime: ['top-anime', 'seasons', 'watch-online', 'studios'],
+                manga: ['top-manga', 'read-online', 'publishers', 'magazines', 'webtoons', 'light-novels'],
+            };
+            const pathSegment = domain.split(`/${media}/`)[1]?.split('/')[0].split('?')[0];
+            if ([...skipPages.generic, ...(media === 'anime' ? skipPages.anime : skipPages.manga)].includes(pathSegment)) return;
 
-            if (skipPages.some((page) => domain.includes(`/${media}/${page}`)) || skipExtra.some((page) => domain.includes(`/${media}/${page}`))) {
-                break;
-            }
+            let titleMain = document.querySelector('[itemprop=name]').textContent;
+            const subPage = location.pathname.split('/')[3];
+            subPage && (titleMain = titleMain.replace(new RegExp(`\\s*-\\s*.*${subPage}.*$`, 'i'), '').trim());
+            titleEng = titleMain;
 
-            setTimeout(() => {
-                const titleMain = document.querySelector('[itemprop=name]').textContent;
-                const titleAlt = document.getElementsByClassName('aka')[0];
-                titleEng = titleMain;
-                titleAlt ? (titleJap = titleAlt.innerText.split(': ').pop()) : (titleJap = titleMain);
+            const titleAlt = document.getElementsByClassName('aka')[0];
+            titleJap =
+                titleAlt?.innerText
+                    .replace(/^Alt titles?:\s*/i, '')
+                    .split(',')[0]
+                    .trim() || titleMain;
 
-                createBtn(document.querySelector('.mainEntry'));
-                btn.classList.add('button');
-                document.querySelectorAll('.mainEntry > .button').forEach((button) => {
-                    typeof button === 'object' && (button.style.width = '180px');
-                });
-                createSearch(getQuery(titleJap, titleEng, queryType));
-            }, 50);
+            createBtn(document.querySelector('.mainEntry'));
+            btn.classList.add('button');
+            document.querySelectorAll('.mainEntry > .button').forEach((button) => {
+                typeof button === 'object' && (button.style.width = '180px');
+            });
+            createSearch(getQuery(titleJap, titleEng, queryType));
             break;
 
-        case domain.includes(`animenewsnetwork.com/encyclopedia/${media}.php?id=`):
-            setTimeout(() => {
-                titleEng = document.getElementById('page_header').innerText.split(' (').shift();
-                for (const altTitle of document.querySelectorAll('#infotype-2 > .tab')) {
-                    altTitle.textContent.includes('Japanese') && !titleJap && (titleJap = altTitle.textContent.split(' (').shift());
-                }
-                !titleJap && titleEng && (titleJap = titleEng);
+        case /animenewsnetwork\.com\/encyclopedia\/(anime|manga)\.php\?id=/.test(domain):
+            domain.includes('manga.php') && (media = 'manga'), (categorySetting = setCategory(settings.category_setting));
+            titleEng = document.getElementById('page_header').innerText.split(' (').shift();
+            for (const altTitle of document.querySelectorAll('#infotype-2 > .tab')) {
+                altTitle.textContent.includes('Japanese') && !titleJap && (titleJap = altTitle.textContent.split(' (').shift());
+            }
+            !titleJap && titleEng && (titleJap = titleEng);
 
-                btnSpace = document.querySelector('.fright') ? document.querySelector('.fright') : document.querySelector('#big-video');
-                createBtn(btnSpace);
-                btn.style.display !== 'none' && (btn.style.display = 'flex');
-                btn.style.alignItems = 'center';
-                btn.style.justifyContent = 'center';
-                btn.style.height = '35px';
-                btn.style.borderRadius = '3px';
-                btn.style.background = '#2d50a7';
-                btn.style.color = '#fff';
-                btn.style.border = '1px solid black';
-                btn.style.textDecoration = 'none';
-                btnSpace.children[0].tagName === 'TABLE' && (btn.style.marginTop = '4px');
-                createSearch(getQuery(titleJap, titleEng, queryType));
-            }, 50);
+            btnSpace = document.querySelector('#big-video') ? document.querySelector('#big-video') : document.querySelector('.fright');
+            createBtn(btnSpace);
+            btn.style.display !== 'none' && (btn.style.display = 'flex');
+            btn.style.alignItems = 'center';
+            btn.style.justifyContent = 'center';
+            btn.style.height = '35px';
+            btn.style.borderRadius = '3px';
+            btn.style.background = '#2d50a7';
+            btn.style.color = '#fff';
+            btn.style.border = '1px solid black';
+            btn.style.textDecoration = 'none';
+            btnSpace.children[0].tagName === 'TABLE' && (btn.style.marginTop = '4px');
+            createSearch(getQuery(titleJap, titleEng, queryType));
             break;
 
         case domain.includes(`anidb.net/${media}/`):
@@ -272,97 +275,52 @@ async function searchNyaa(settings) {
             }
             break;
 
-        case domain.includes('mangabaka.dev') || domain.includes('mangabaka.org'):
-            const mainContentWrapper = await awaitLoadOf('.content-wrapper', 'container');
-            let directPage, gridContainer;
+        case /mangabaka\.(dev|org)/.test(domain):
+            cardType = !/^\/\d+$/.test(location.pathname);
+            mbElmLis && document.removeEventListener('mb:element:ready', mbElmLis);
+            mbElmLis = (elm) => {
+                mbLastHref !== location.href && (mbHandled.clear(), (mbLastHref = location.href));
+                handleMangabakaCard(elm.detail);
+            };
+            document.addEventListener('mb:element:ready', mbElmLis);
 
-            media = 'manga';
-            categorySetting = setCategory(categorySetting);
+            document.querySelectorAll('[data-browser-extension-injection].ratings-list').forEach((ratings) => {
+                const card = ratings.closest('.bg-card');
+                if (!card || card.querySelector('.nyaaBtn')) return;
+                s_roman = cardType ? card.querySelector('div.line-clamp-2[title]')?.title : document.querySelector('h2')?.innerHTML;
+                s_title = cardType ? card.querySelector('a.line-clamp-2[title]')?.title : document.querySelector('h1')?.innerHTML;
 
-            const bakaHelper = (dbEntry, mainSelector, altSelector) => {
-                cardType = !directPage;
+                handleMangabakaCard({
+                    element_id: ratings.id,
+                    name: 'ratings',
+                    series: {
+                        romanized_title: s_roman?.trim(),
+                        title: s_title?.trim(),
+                    },
+                    list_config: { mode: 'list_dense' },
+                });
+            });
 
-                titleJap = dbEntry.querySelector(mainSelector)?.innerText || '';
-                const altTitles = altSelector ? [...dbEntry.querySelectorAll(altSelector)].map((e) => e.title).filter(Boolean) : [];
-                altTitles ? (titleEng = altTitles[0]) : null;
+            function handleMangabakaCard(detail) {
+                if (!detail?.element_id || detail?.name !== 'ratings') return;
+                const ratingContainer = document.getElementById(detail.element_id);
+                if (!ratingContainer || ratingContainer.querySelector('.nyaaBtn')) return;
 
-                const ratingContainer =
-                    dbEntry.querySelector('.ratings-list') || dbEntry.querySelector('.flex.flex-wrap.items-center.gap-2 > .flex.flex-wrap.gap-2');
-                if (!ratingContainer) return;
+                titleJap = detail.series?.romanized_title || detail.series?.title || '';
+                titleEng = detail.series?.title || '';
 
-                const tttCache = gridContainer?.querySelector('a[data-slot="tooltip-trigger"]');
-                const pxValue = tttCache?.classList.contains('px-3') ? { class: 'px-3', hClass: 'h-10' } : { class: 'px-2', hClass: 'h-8' };
+                if (mbHandled.has(`${detail.element_id}|${titleJap}`)) return;
+                mbHandled.add(`${detail.element_id}|${titleJap}`);
 
+                ratingContainer.querySelectorAll('.nyaaBtn').forEach((e) => e.remove());
                 createBtn(ratingContainer);
                 btn.title = 'Search on Nyaa';
-                btn.className = 'bg-secondary hover:bg-secondary/80 inline-flex items-center justify-center rounded-md h-10 nyaaBtn';
-                if (tttCache) {
-                    btn.classList.remove('h-8', 'h-10');
-                    btn.classList.add(pxValue.hClass);
-                }
-
-                const btnImg = btn.appendChild(document.createElement('img'));
-                btnImg.className = 'size-5 min-w-5';
-                btnImg.src = 'https://i.imgur.com/9Fr2BRG.png';
-
+                const px = ['list_dense', 'grid_dense'].includes(detail.list_config?.mode) ? { h: 'h-8', w: '58px' } : { h: 'h-10', w: '66px' };
+                btn.classList.add('bg-secondary', 'hover:bg-secondary/80', 'inline-flex', 'items-center', 'justify-center', 'rounded-md', px.h);
+                const img = btn.appendChild(document.createElement('img'));
+                img.className = 'size-5';
+                img.src = 'https://i.imgur.com/9Fr2BRG.png';
                 createSearch(getQuery(titleJap, titleEng, queryType));
-            };
-
-            if (/\/\d+(\/|$)/.test(window.location.pathname)) {
-                if (/\/\d+\/related\/?$/.test(window.location.pathname)) {
-                    gridContainer = await awaitLoadOf('.grid-container', 'container', mainContentWrapper);
-                    const relatedCards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
-                    relatedCards.forEach((card) => bakaHelper(card, 'a.line-clamp-2', 'span.line-clamp-2'));
-                } else {
-                    directPage = true;
-                    gridContainer = mainContentWrapper.querySelector('div.grid.gap-4');
-                    requestAnimationFrame(() => {
-                        requestAnimationFrame(() => bakaHelper(mainContentWrapper, 'h1', 'h2'));
-                    });
-                }
-            } else if (window.location.pathname === '/') {
-                const recentlyViewedHeader = await awaitLoadOf('h5', 'text', 'Recently viewed series', mainContentWrapper);
-                gridContainer = recentlyViewedHeader.nextElementSibling;
-                const recentlyViewedCards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
-                recentlyViewedCards.forEach((card) => {
-                    bakaHelper(card, 'a.line-clamp-1');
-                    btn.classList.replace('h-10', 'h-8');
-                });
-            } else if (
-                window.location.href.includes('/library') ||
-                /\/u\/[^\/]+$/.test(window.location.href) ||
-                window.location.href.includes('/search?')
-            ) {
-                let modeType;
-
-                if (window.location.href.includes('/search?')) {
-                    if (mainContentWrapper.querySelector('div.grid-container')) {
-                        modeType = 'grid';
-                        gridContainer = mainContentWrapper.querySelector('div.grid-container');
-                    } else if (mainContentWrapper.querySelector('div.grid.gap-4')) {
-                        modeType = 'list';
-                        gridContainer = mainContentWrapper.querySelector('div.grid.gap-4');
-                    }
-                } else {
-                    const libraryDiv = await awaitLoadOf('div.order-1', 'text', '(', mainContentWrapper);
-
-                    let countMatch;
-                    const startTime = Date.now();
-                    while (!(countMatch = libraryDiv.textContent.match(/\((\d+)\)/)) || parseInt(countMatch[1]) === 0) {
-                        await new Promise((resolve) => setTimeout(resolve, 100));
-                        if (Date.now() - startTime > 5000) break;
-                    }
-
-                    gridContainer = await awaitLoadOf('div.grid.gap-4', 'container', mainContentWrapper);
-                    modeType = 'library';
-                }
-
-                const cards = Array.from(await awaitLoadOf('.bg-card', 'count', gridContainer));
-                cards.forEach((card) => {
-                    const cardAltTitles = modeType === 'grid' ? 'span.line-clamp-2' : 'div.line-clamp-2';
-                    bakaHelper(card, 'a.line-clamp-2', cardAltTitles);
-                    modeType === 'library' && (btn.style.width = btn.classList.contains('h-8') ? '58px' : '66px');
-                });
             }
             break;
     }

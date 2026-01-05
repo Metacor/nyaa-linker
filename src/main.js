@@ -277,6 +277,7 @@ async function searchNyaa(settings) {
 
         case /mangabaka\.(dev|org)/.test(domain):
             cardType = !/^\/\d+$/.test(location.pathname);
+            (media = 'manga'), (categorySetting = setCategory(categorySetting));
             mbElmLis && document.removeEventListener('mb:element:ready', mbElmLis);
             mbElmLis = (elm) => {
                 mbLastHref !== location.href && (mbHandled.clear(), (mbLastHref = location.href));
